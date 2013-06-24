@@ -22,7 +22,8 @@
       (str code)]]
     [:div.grid-two-thirds
      [:div.visual-sexp
-      (map renderers/render-sexp sexps)]]]])
+      (map renderers/render-sexp sexps)]
+     [:span "Mouseover the blocks to see hints."]]]])
 
 
 (add-dom-watch :code-watch [state new-el]
