@@ -32,12 +32,13 @@
                    {:sexps (read-string (str "[" code "]"))
                     :code code}
                    (catch js/Object e
+                     (c-log e)
                      {:code code}))))
 
 
 (def sample-code "
 (defn map [f [x & xs]]
-  (cons (f x (map f xs))))
+  (cons (f x) (map f xs)))
 
 (defn fact [n]
   (if (= n 1)
