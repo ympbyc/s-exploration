@@ -1,6 +1,6 @@
-(ns code-view.core-test
+(ns s-exploration.core-test
   (:use clojure.test
-        code-view.core))
+        s-exploration.core))
 
 (deftest a-test
   (testing "FIXME, I fail."

@@ -1,3 +1,3 @@
-# Introduction to code-view
+# Introduction to s-exploration
 
 TODO: write [great documentation](http://jacobian.org/writing/great-documentation/what-to-write/)

@@ -1,4 +1,4 @@
-(ns code-view.core
+(ns s-exploration.core
   (:use [webfui.framework :only [launch-app]]
         [webfui.utilities :only [get-attribute]]
         [cljs.reader      :only [read-string]])
