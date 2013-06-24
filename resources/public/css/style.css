@@ -1,5 +1,54 @@
+header h1{
+    margin: 2px 2px -6px 50px;
+    font-weight: bold;
+    font-size: 2em;
+}
+
+header {
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding-left: 0px;
+    color: #262734;
+    border-bottom: 3px solid #205081;
+    font-size: 16px;
+    background: #F5F5F5;
+    z-index: 10;
+    margin-bottom: 20px;
+}
+
+
+i {
+    font-style: italic;
+}
+
+body {
+    background: #fff;
+}
+
+
+#content {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
 textarea {
-    min-width: 400px;
-    min-height: 200px;
-    font-size: 1em;
+    background-color: #fff;
+}
+
+
+.inline-block {
+    display: inline-block;
+}
+
+
+.visual-sexp {
+    background: #f5f5f5;
+    box-shadow: inset 2px 2px 3px #333;
+    padding: 20px;
+}
+
+
+#code {
+    min-height: 400px;
 }

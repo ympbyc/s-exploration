@@ -12,14 +12,17 @@
 
 
 (defn render-all [{:keys [sexps code]}]
-  [:dic#content
-   [:h1 "S式"]
-   [:div
-    [:textarea#code {:watch :code-watch}
-     (str code)]]
-   [:div.visual-sexp
-    (map renderers/render-sexp sexps)]])
-
+  [:div
+   [:header [:h1 "S-Exploration"]
+    [:i "Code is data. Data needs a visualization tool."]]
+   [:div#content
+    [:span {:style {:color "red"}} "Due to WebFUI's undesirable behaviour, the textarea is disabled for now. Please be patient until I patch that away."]
+    [:div.grid-third
+     [:textarea#code {:watch :code-watch :disabled true}
+      (str code)]]
+    [:div.grid-two-thirds
+     [:div.visual-sexp
+      (map renderers/render-sexp sexps)]]]])
 
 
 (add-dom-watch :code-watch [state new-el]
@@ -41,6 +44,11 @@
     (* n (fact (- n 1)))))
 
 (map fact [1 2 3 4 5])
+
+{ :name \"Clojure\"
+  :characteristics
+  [\"simple\" \"awesome\"]
+  :identity (fn [x] x) }
 ")
 
 (launch-app (atom {:sexps (read-string (str "[" sample-code "]"))

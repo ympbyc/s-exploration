@@ -21688,59 +21688,91 @@ goog.require("cljs.core");
 s_exploration.renderers.render_sym = function render_sym(sym) {
   return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-symbol.sexp-item", [cljs.core.str(sym)].join("")], true)
 };
-s_exploration.renderers.render_defn = function render_defn(p__4800) {
-  var vec__4802 = p__4800;
-  var _ = cljs.core.nth.call(null, vec__4802, 0, null);
-  var name = cljs.core.nth.call(null, vec__4802, 1, null);
-  var args = cljs.core.nth.call(null, vec__4802, 2, null);
-  var body = cljs.core.nthnext.call(null, vec__4802, 3);
-  return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-defn.sexp-wrap", cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-defn.sexp-item", "defn"], true), cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-fn.sexp-item", [cljs.core.str(name)].join("")], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-vec.sexp-wrap", cljs.core.map.call(null, s_exploration.renderers.render_sexp, args)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.newline", cljs.core.map.call(null, 
-  s_exploration.renderers.render_sexp, body)], true)], true)
+s_exploration.renderers.render_vector = function render_vector(sexp) {
+  return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-vec.sexp-wrap", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "a vector"], true), cljs.core.map.call(null, s_exploration.renderers.render_sexp, sexp)], true)
 };
-s_exploration.renderers.render_if = function render_if(p__4803) {
-  var vec__4805 = p__4803;
-  var _ = cljs.core.nth.call(null, vec__4805, 0, null);
-  var cond = cljs.core.nth.call(null, vec__4805, 1, null);
-  var then = cljs.core.nth.call(null, vec__4805, 2, null);
-  var else$ = cljs.core.nth.call(null, vec__4805, 3, null);
-  return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-if.sexp-wrap", cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-if", "if"], true), s_exploration.renderers.render_sexp.call(null, cond), cljs.core.PersistentVector.fromArray(["\ufdd0:div.newline", s_exploration.renderers.render_sexp.call(null, then), cljs.core.PersistentVector.fromArray(["\ufdd0:div.newline", s_exploration.renderers.render_sexp.call(null, else$)], true)], true)], true)
+s_exploration.renderers.render_table = function render_table(hmap) {
+  return cljs.core.map.call(null, function(p__17894) {
+    var vec__17895 = p__17894;
+    var k = cljs.core.nth.call(null, vec__17895, 0, null);
+    var v = cljs.core.nth.call(null, vec__17895, 1, null);
+    return cljs.core.PersistentVector.fromArray(["\ufdd0:tr", cljs.core.PersistentVector.fromArray(["\ufdd0:td.wrap-mapkey", s_exploration.renderers.render_sexp.call(null, k)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:td.wrap-mapval", s_exploration.renderers.render_sexp.call(null, v)], true)], true)
+  }, hmap)
 };
-s_exploration.renderers.render_call = function render_call(p__4806) {
-  var vec__4810 = p__4806;
-  var form = cljs.core.nth.call(null, vec__4810, 0, null);
-  var rest = cljs.core.nthnext.call(null, vec__4810, 1);
-  var sexp = vec__4810;
+s_exploration.renderers.render_map = function render_map(hmap) {
+  return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-map.sexp-wrap", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "a map"], true), cljs.core.PersistentVector.fromArray(["\ufdd0:table", s_exploration.renderers.render_table.call(null, hmap)], true)], true)
+};
+s_exploration.renderers.render_defn = function render_defn(p__17896) {
+  var vec__17898 = p__17896;
+  var _ = cljs.core.nth.call(null, vec__17898, 0, null);
+  var name = cljs.core.nth.call(null, vec__17898, 1, null);
+  var args = cljs.core.nth.call(null, vec__17898, 2, null);
+  var body = cljs.core.nthnext.call(null, vec__17898, 3);
+  return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-defn.sexp-wrap", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:draggable", "true", "\ufdd0:title", "function definition"], true), cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-defn.sexp-item", "defn"], true), cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-defn-fname.sexp-item", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "function name"], true), [cljs.core.str(name)].join("")], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-vec.sexp-wrap", 
+  cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "function parameters"], true), cljs.core.map.call(null, s_exploration.renderers.render_sexp, args)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.newline", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "function body"], true), cljs.core.map.call(null, s_exploration.renderers.render_sexp, body)], true)], true)
+};
+s_exploration.renderers.render_fn = function render_fn(p__17899) {
+  var vec__17901 = p__17899;
+  var _ = cljs.core.nth.call(null, vec__17901, 0, null);
+  var args = cljs.core.nth.call(null, vec__17901, 1, null);
+  var body = cljs.core.nthnext.call(null, vec__17901, 2);
+  return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-fn.sexp-wrap", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "a lambda"], true), cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-item", "fn"], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-vec.sexp-wrap", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "function parameters"], true), cljs.core.map.call(null, s_exploration.renderers.render_sexp, args)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.inline-block", 
+  cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "function body"], true), cljs.core.map.call(null, s_exploration.renderers.render_sexp, body)], true)], true)
+};
+s_exploration.renderers.render_if = function render_if(p__17902) {
+  var vec__17904 = p__17902;
+  var _ = cljs.core.nth.call(null, vec__17904, 0, null);
+  var cond = cljs.core.nth.call(null, vec__17904, 1, null);
+  var then = cljs.core.nth.call(null, vec__17904, 2, null);
+  var else$ = cljs.core.nth.call(null, vec__17904, 3, null);
+  return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-if.sexp-wrap", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "a specialform - if"], true), cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-if", "if"], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.inline-block", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "condition"], true), s_exploration.renderers.render_sexp.call(null, cond)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.newline", 
+  cljs.core.PersistentVector.fromArray(["\ufdd0:div.inline-block", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "then branch"], true), s_exploration.renderers.render_sexp.call(null, then)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.newline", cljs.core.PersistentVector.fromArray(["\ufdd0:div.inline-block", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "else branch"], true), s_exploration.renderers.render_sexp.call(null, else$)], true)], true)], true)], true)
+};
+s_exploration.renderers.render_call = function render_call(p__17905) {
+  var vec__17909 = p__17905;
+  var form = cljs.core.nth.call(null, vec__17909, 0, null);
+  var rest = cljs.core.nthnext.call(null, vec__17909, 1);
+  var sexp = vec__17909;
   if(cljs.core._EQ_.call(null, form, new cljs.core.Symbol(null, "defn", "defn", -1637452094, null))) {
     return s_exploration.renderers.render_defn.call(null, sexp)
   }else {
-    if(cljs.core._EQ_.call(null, form, new cljs.core.Symbol(null, "if", "if", -1640528170, null))) {
-      return s_exploration.renderers.render_if.call(null, sexp)
+    if(cljs.core._EQ_.call(null, form, new cljs.core.Symbol(null, "fn", "fn", -1640528255, null))) {
+      return s_exploration.renderers.render_fn.call(null, sexp)
     }else {
-      if("\ufdd0:else") {
-        return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-ap.sexp-wrap", cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-fn.sexp-item", [cljs.core.str(form)].join("")], true), cljs.core.map.call(null, s_exploration.renderers.render_sexp, rest)], true)
+      if(cljs.core._EQ_.call(null, form, new cljs.core.Symbol(null, "if", "if", -1640528170, null))) {
+        return s_exploration.renderers.render_if.call(null, sexp)
       }else {
-        return null
+        if("\ufdd0:else") {
+          return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-ap.sexp-wrap", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "function application"], true), cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-fn.sexp-item", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "name of the function"], true), [cljs.core.str(form)].join("")], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.inline-block", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "arguments to the function"], 
+          true), cljs.core.map.call(null, s_exploration.renderers.render_sexp, rest)], true)], true)
+        }else {
+          return null
+        }
       }
     }
   }
 };
 s_exploration.renderers.render_val = function render_val(sexp) {
   if(typeof sexp === "number") {
-    return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-num.sexp-item", [cljs.core.str(sexp)].join("")], true)
+    return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-num.sexp-item", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "number"], true), [cljs.core.str(sexp)].join("")], true)
   }else {
     if(cljs.core.string_QMARK_.call(null, sexp)) {
-      return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-str.sexp-item", [cljs.core.str(sexp)].join("")], true)
+      return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-str.sexp-item", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "string"], true), [cljs.core.str(sexp)].join("")], true)
     }else {
       if(cljs.core._EQ_.call(null, sexp, new cljs.core.Symbol(null, "&", "&", -1640531489, null))) {
-        return cljs.core.PersistentVector.fromArray(["\ufdd0:span", "&"], true)
+        return cljs.core.PersistentVector.fromArray(["\ufdd0:span", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "ampersand followed by a parameter denotes rest-argument"], true), "&"], true)
       }else {
         if(sexp instanceof cljs.core.Symbol) {
-          return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-symbol.sexp-item", [cljs.core.str(sexp)].join("")], true)
+          return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-symbol.sexp-item", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "symbol"], true), [cljs.core.str(sexp)].join("")], true)
         }else {
-          if(true) {
-            return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-val.sexp-item", [cljs.core.str(sexp)].join("")], true)
+          if(cljs.core.keyword_QMARK_.call(null, sexp)) {
+            return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-val.sexp-item", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "keyword"], true), [cljs.core.str(sexp)].join("")], true)
           }else {
-            return null
+            if(true) {
+              return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-val.sexp-item", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:title", "value"], true), [cljs.core.str(sexp)].join("")], true)
+            }else {
+              return null
+            }
           }
         }
       }
@@ -21749,15 +21781,19 @@ s_exploration.renderers.render_val = function render_val(sexp) {
 };
 s_exploration.renderers.render_sexp = function render_sexp(sexp) {
   if(cljs.core.vector_QMARK_.call(null, sexp)) {
-    return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-vec.sexp-wrap", cljs.core.map.call(null, render_sexp, sexp)], true)
+    return s_exploration.renderers.render_vector.call(null, sexp)
   }else {
-    if(cljs.core.coll_QMARK_.call(null, sexp)) {
-      return s_exploration.renderers.render_call.call(null, sexp)
+    if(cljs.core.map_QMARK_.call(null, sexp)) {
+      return s_exploration.renderers.render_map.call(null, sexp)
     }else {
-      if(true) {
-        return s_exploration.renderers.render_val.call(null, sexp)
+      if(cljs.core.coll_QMARK_.call(null, sexp)) {
+        return s_exploration.renderers.render_call.call(null, sexp)
       }else {
-        return null
+        if(true) {
+          return s_exploration.renderers.render_val.call(null, sexp)
+        }else {
+          return null
+        }
       }
     }
   }
@@ -24440,30 +24476,31 @@ s_exploration.core.c_log = function c_log(x) {
   console.log(cljs.core.clj__GT_js.call(null, x));
   return x
 };
-s_exploration.core.render_all = function render_all(p__3631) {
-  var map__3633 = p__3631;
-  var map__3633__$1 = cljs.core.seq_QMARK_.call(null, map__3633) ? cljs.core.apply.call(null, cljs.core.hash_map, map__3633) : map__3633;
-  var code = cljs.core.get.call(null, map__3633__$1, "\ufdd0:code");
-  var sexps = cljs.core.get.call(null, map__3633__$1, "\ufdd0:sexps");
-  return cljs.core.PersistentVector.fromArray(["\ufdd0:dic#content", cljs.core.PersistentVector.fromArray(["\ufdd0:h1", "S\u5f0f"], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div", cljs.core.PersistentVector.fromArray(["\ufdd0:textarea#code", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:watch", "\ufdd0:code-watch"], true), [cljs.core.str(code)].join("")], true)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.visual-sexp", cljs.core.map.call(null, s_exploration.renderers.render_sexp, 
-  sexps)], true)], true)
+s_exploration.core.render_all = function render_all(p__21348) {
+  var map__21350 = p__21348;
+  var map__21350__$1 = cljs.core.seq_QMARK_.call(null, map__21350) ? cljs.core.apply.call(null, cljs.core.hash_map, map__21350) : map__21350;
+  var code = cljs.core.get.call(null, map__21350__$1, "\ufdd0:code");
+  var sexps = cljs.core.get.call(null, map__21350__$1, "\ufdd0:sexps");
+  return cljs.core.PersistentVector.fromArray(["\ufdd0:div", cljs.core.PersistentVector.fromArray(["\ufdd0:header", cljs.core.PersistentVector.fromArray(["\ufdd0:h1", "S-Exploration"], true), cljs.core.PersistentVector.fromArray(["\ufdd0:i", "Code is data. Data needs a visualization tool."], true)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div#content", cljs.core.PersistentVector.fromArray(["\ufdd0:span", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:style", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:color", 
+  "red"], true)], true), "Due to WebFUI's undesirable behaviour, the textarea is disabled for now. Please be patient until I patch that away."], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.grid-third", cljs.core.PersistentVector.fromArray(["\ufdd0:textarea#code", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:watch", "\ufdd0:code-watch", "\ufdd0:disabled", true], true), [cljs.core.str(code)].join("")], true)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.grid-two-thirds", 
+  cljs.core.PersistentVector.fromArray(["\ufdd0:div.visual-sexp", cljs.core.map.call(null, s_exploration.renderers.render_sexp, sexps)], true)], true)], true)], true)
 };
 webfui.framework.add_dom_watch_helper.call(null, "\ufdd0:code-watch", function(state, new_el) {
   var code = (new cljs.core.Keyword("\ufdd0:value")).call(null, cljs.core.second.call(null, new_el));
   try {
     return cljs.core.PersistentArrayMap.fromArray(["\ufdd0:sexps", cljs.reader.read_string.call(null, [cljs.core.str("["), cljs.core.str(code), cljs.core.str("]")].join("")), "\ufdd0:code", code], true)
-  }catch(e3634) {
-    if(e3634 instanceof Object) {
-      var e = e3634;
+  }catch(e21351) {
+    if(e21351 instanceof Object) {
+      var e = e21351;
       return cljs.core.PersistentArrayMap.fromArray(["\ufdd0:code", code], true)
     }else {
       if("\ufdd0:else") {
-        throw e3634;
+        throw e21351;
       }else {
         return null
       }
     }
   }
 });
-s_exploration.core.sample_code = "\n(defn map [f [x & xs]]\n  (cons (f x (map f xs))))\n\n(defn fact [n]\n  (if (= n 1)\n    1\n    (* n (fact (- n 1)))))\n\n(map fact [1 2 3 4 5])\n";
+s_exploration.core.sample_code = '\n(defn map [f [x & xs]]\n  (cons (f x (map f xs))))\n\n(defn fact [n]\n  (if (= n 1)\n    1\n    (* n (fact (- n 1)))))\n\n(map fact [1 2 3 4 5])\n\n{ :name "Clojure"\n  :characteristics\n  ["simple" "awesome"]\n  :identity (fn [x] x) }\n';
 webfui.framework.launch_app.call(null, cljs.core.atom.call(null, cljs.core.PersistentArrayMap.fromArray(["\ufdd0:sexps", cljs.reader.read_string.call(null, [cljs.core.str("["), cljs.core.str(s_exploration.core.sample_code), cljs.core.str("]")].join("")), "\ufdd0:code", s_exploration.core.sample_code], true)), s_exploration.core.render_all);
