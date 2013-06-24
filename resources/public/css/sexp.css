@@ -6,7 +6,7 @@
     box-shadow: 1px 2px 3px #000;
 
 
-    border: 1px solid #fff;
+    border: 1px outset #fff;
 }
 
 .wrap-defn {
@@ -21,13 +21,14 @@
 }
 
 .wrap-vec {
-    padding:    2px;
+    padding:    2px 4px;
     background: #c0d860;
     border: 1px solid #62937e;
 }
 
 .wrap-if {
     background: #e1a91a;
+    border: none;
 }
 
 .wrap-if-cond {

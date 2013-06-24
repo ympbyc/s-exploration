@@ -41,7 +41,7 @@
 
 (defn render-fn [[_ args & body]]
   [:div.wrap-fn.sexp-wrap {:title "a lambda"}
-   [:span.sexp-item "fn"]
+   [:span.sexp-defn.sexp-item "fn"]
    [:div.wrap-vec.sexp-wrap {:title "function parameters"}
     (map render-sexp args)]
    [:div.inline-block {:title "function body"}
@@ -70,7 +70,9 @@
          'if   (render-if sexp)
 
          _ [:div.wrap-ap.sexp-wrap {:title "function application"}
-            [:span.sexp-fn.sexp-item {:title "name of the function"} (str form)]
+            (if (symbol? form)
+              [:span.sexp-fn.sexp-item {:title "name of the function"} (str form)]
+              (render-sexp form))
             [:div.inline-block {:title "arguments to the function"}
              (map render-sexp rest)]]))
 

@@ -18,7 +18,7 @@
    [:div#content
     [:span {:style {:color "red"}} "Due to WebFUI's undesirable behaviour, the textarea is disabled for now. Please be patient until I patch that away."]
     [:div.grid-third
-     [:textarea#code {:watch :code-watch :disabled true}
+     [:textarea#code {:watch :code-watch}
       (str code)]]
     [:div.grid-two-thirds
      [:div.visual-sexp
@@ -47,10 +47,11 @@
 (map fact [1 2 3 4 5])
 
 { :name \"Clojure\"
-  :characteristics
-  [\"simple\" \"awesome\"]
-  :identity (fn [x] x) }
+ :characteristics
+ [\"simple\" \"awesome\"]
+ :identity (fn [x] x) }
 ")
+
 
 (launch-app (atom {:sexps (read-string (str "[" sample-code "]"))
                    :code  sample-code})
