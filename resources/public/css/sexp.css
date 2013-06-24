@@ -1,0 +1,66 @@
+.sexp-wrap {
+    display: inline-block;
+    border-radius: 5px;
+    margin: 4px;
+    padding: 5px;
+
+
+
+    border: 1px solid #c0d860;
+}
+
+.wrap-defn {
+    background-color: #8a5cb8;
+    border: none;
+}
+
+.wrap-vec {
+    padding:    2px;
+    background: #c0d860;
+    border: 1px solid #62937e;
+}
+
+.wrap-if {
+    background: #e1a91a;
+}
+
+.wrap-if-cond {
+    display: inline-block;
+    background: #b3b3b3;
+    padding: 4px;
+    margin: 0 2px;
+}
+
+.wrap-ap {
+    background: #52a0e8;
+    padding: 1px 2px;
+}
+
+
+.sexp-item {
+    border-radius: 5px;
+    margin: 0 3px;
+    padding: 2px 4px;
+}
+
+
+.sexp-fn {
+    background: #e6c213;
+}
+
+
+.sexp-val {
+    background: #7197c7;
+}
+
+.sexp-symbol {
+    background: #ee7d16;
+}
+
+.sexp-num {
+    background: #fff;
+}
+
+.sexp-str {
+    background: #77ac19;
+}

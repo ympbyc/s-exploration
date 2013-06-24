@@ -487,6 +487,19 @@ goog.base = function(me, opt_methodName, var_args) {
 goog.scope = function(fn) {
   fn.call(goog.global)
 };
+goog.provide("goog.debug.Error");
+goog.debug.Error = function(opt_msg) {
+  if(Error.captureStackTrace) {
+    Error.captureStackTrace(this, goog.debug.Error)
+  }else {
+    this.stack = (new Error).stack || ""
+  }
+  if(opt_msg) {
+    this.message = String(opt_msg)
+  }
+};
+goog.inherits(goog.debug.Error, Error);
+goog.debug.Error.prototype.name = "CustomError";
 goog.provide("goog.string");
 goog.provide("goog.string.Unicode");
 goog.string.Unicode = {NBSP:"\u00a0"};
@@ -927,19 +940,6 @@ goog.string.parseInt = function(value) {
   }
   return NaN
 };
-goog.provide("goog.debug.Error");
-goog.debug.Error = function(opt_msg) {
-  if(Error.captureStackTrace) {
-    Error.captureStackTrace(this, goog.debug.Error)
-  }else {
-    this.stack = (new Error).stack || ""
-  }
-  if(opt_msg) {
-    this.message = String(opt_msg)
-  }
-};
-goog.inherits(goog.debug.Error, Error);
-goog.debug.Error.prototype.name = "CustomError";
 goog.provide("goog.asserts");
 goog.provide("goog.asserts.AssertionError");
 goog.require("goog.debug.Error");
@@ -21683,6 +21683,85 @@ cljs.core.special_symbol_QMARK_ = function special_symbol_QMARK_(x) {
   new cljs.core.Symbol(null, ".", ".", -1640531481, null), new cljs.core.Symbol(null, "ns", "ns", -1640528002, null), new cljs.core.Symbol(null, "do", "do", -1640528316, null), new cljs.core.Symbol(null, "fn*", "fn*", -1640430053, null), new cljs.core.Symbol(null, "throw", "throw", -1530191713, null), new cljs.core.Symbol(null, "letfn*", "letfn*", 1548249632, null), new cljs.core.Symbol(null, "js*", "js*", -1640426054, null), new cljs.core.Symbol(null, "defrecord*", "defrecord*", 774272013, null), 
   new cljs.core.Symbol(null, "let*", "let*", -1637213400, null), new cljs.core.Symbol(null, "loop*", "loop*", -1537374273, null), new cljs.core.Symbol(null, "if", "if", -1640528170, null), new cljs.core.Symbol(null, "def", "def", -1640432194, null)]), x)
 };
+goog.provide("s_exploration.renderers");
+goog.require("cljs.core");
+s_exploration.renderers.render_sym = function render_sym(sym) {
+  return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-symbol.sexp-item", [cljs.core.str(sym)].join("")], true)
+};
+s_exploration.renderers.render_defn = function render_defn(p__4800) {
+  var vec__4802 = p__4800;
+  var _ = cljs.core.nth.call(null, vec__4802, 0, null);
+  var name = cljs.core.nth.call(null, vec__4802, 1, null);
+  var args = cljs.core.nth.call(null, vec__4802, 2, null);
+  var body = cljs.core.nthnext.call(null, vec__4802, 3);
+  return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-defn.sexp-wrap", cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-defn.sexp-item", "defn"], true), cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-fn.sexp-item", [cljs.core.str(name)].join("")], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-vec.sexp-wrap", cljs.core.map.call(null, s_exploration.renderers.render_sexp, args)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.newline", cljs.core.map.call(null, 
+  s_exploration.renderers.render_sexp, body)], true)], true)
+};
+s_exploration.renderers.render_if = function render_if(p__4803) {
+  var vec__4805 = p__4803;
+  var _ = cljs.core.nth.call(null, vec__4805, 0, null);
+  var cond = cljs.core.nth.call(null, vec__4805, 1, null);
+  var then = cljs.core.nth.call(null, vec__4805, 2, null);
+  var else$ = cljs.core.nth.call(null, vec__4805, 3, null);
+  return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-if.sexp-wrap", cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-if", "if"], true), s_exploration.renderers.render_sexp.call(null, cond), cljs.core.PersistentVector.fromArray(["\ufdd0:div.newline", s_exploration.renderers.render_sexp.call(null, then), cljs.core.PersistentVector.fromArray(["\ufdd0:div.newline", s_exploration.renderers.render_sexp.call(null, else$)], true)], true)], true)
+};
+s_exploration.renderers.render_call = function render_call(p__4806) {
+  var vec__4810 = p__4806;
+  var form = cljs.core.nth.call(null, vec__4810, 0, null);
+  var rest = cljs.core.nthnext.call(null, vec__4810, 1);
+  var sexp = vec__4810;
+  if(cljs.core._EQ_.call(null, form, new cljs.core.Symbol(null, "defn", "defn", -1637452094, null))) {
+    return s_exploration.renderers.render_defn.call(null, sexp)
+  }else {
+    if(cljs.core._EQ_.call(null, form, new cljs.core.Symbol(null, "if", "if", -1640528170, null))) {
+      return s_exploration.renderers.render_if.call(null, sexp)
+    }else {
+      if("\ufdd0:else") {
+        return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-ap.sexp-wrap", cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-fn.sexp-item", [cljs.core.str(form)].join("")], true), cljs.core.map.call(null, s_exploration.renderers.render_sexp, rest)], true)
+      }else {
+        return null
+      }
+    }
+  }
+};
+s_exploration.renderers.render_val = function render_val(sexp) {
+  if(typeof sexp === "number") {
+    return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-num.sexp-item", [cljs.core.str(sexp)].join("")], true)
+  }else {
+    if(cljs.core.string_QMARK_.call(null, sexp)) {
+      return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-str.sexp-item", [cljs.core.str(sexp)].join("")], true)
+    }else {
+      if(cljs.core._EQ_.call(null, sexp, new cljs.core.Symbol(null, "&", "&", -1640531489, null))) {
+        return cljs.core.PersistentVector.fromArray(["\ufdd0:span", "&"], true)
+      }else {
+        if(sexp instanceof cljs.core.Symbol) {
+          return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-symbol.sexp-item", [cljs.core.str(sexp)].join("")], true)
+        }else {
+          if(true) {
+            return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-val.sexp-item", [cljs.core.str(sexp)].join("")], true)
+          }else {
+            return null
+          }
+        }
+      }
+    }
+  }
+};
+s_exploration.renderers.render_sexp = function render_sexp(sexp) {
+  if(cljs.core.vector_QMARK_.call(null, sexp)) {
+    return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-vec.sexp-wrap", cljs.core.map.call(null, render_sexp, sexp)], true)
+  }else {
+    if(cljs.core.coll_QMARK_.call(null, sexp)) {
+      return s_exploration.renderers.render_call.call(null, sexp)
+    }else {
+      if(true) {
+        return s_exploration.renderers.render_val.call(null, sexp)
+      }else {
+        return null
+      }
+    }
+  }
+};
 goog.provide("webfui.utilities");
 goog.require("cljs.core");
 webfui.utilities.body = function body() {
@@ -21698,864 +21777,6 @@ webfui.utilities.clicked = function clicked(first_element, last_element) {
   }else {
     return and__3941__auto__
   }
-};
-goog.provide("clojure.set");
-goog.require("cljs.core");
-clojure.set.bubble_max_key = function bubble_max_key(k, coll) {
-  var max = cljs.core.apply.call(null, cljs.core.max_key, k, coll);
-  return cljs.core.cons.call(null, max, cljs.core.remove.call(null, function(p1__5721_SHARP_) {
-    return max === p1__5721_SHARP_
-  }, coll))
-};
-clojure.set.union = function() {
-  var union = null;
-  var union__0 = function() {
-    return cljs.core.PersistentHashSet.EMPTY
-  };
-  var union__1 = function(s1) {
-    return s1
-  };
-  var union__2 = function(s1, s2) {
-    if(cljs.core.count.call(null, s1) < cljs.core.count.call(null, s2)) {
-      return cljs.core.reduce.call(null, cljs.core.conj, s2, s1)
-    }else {
-      return cljs.core.reduce.call(null, cljs.core.conj, s1, s2)
-    }
-  };
-  var union__3 = function() {
-    var G__5723__delegate = function(s1, s2, sets) {
-      var bubbled_sets = clojure.set.bubble_max_key.call(null, cljs.core.count, cljs.core.conj.call(null, sets, s2, s1));
-      return cljs.core.reduce.call(null, cljs.core.into, cljs.core.first.call(null, bubbled_sets), cljs.core.rest.call(null, bubbled_sets))
-    };
-    var G__5723 = function(s1, s2, var_args) {
-      var sets = null;
-      if(arguments.length > 2) {
-        sets = cljs.core.array_seq(Array.prototype.slice.call(arguments, 2), 0)
-      }
-      return G__5723__delegate.call(this, s1, s2, sets)
-    };
-    G__5723.cljs$lang$maxFixedArity = 2;
-    G__5723.cljs$lang$applyTo = function(arglist__5724) {
-      var s1 = cljs.core.first(arglist__5724);
-      arglist__5724 = cljs.core.next(arglist__5724);
-      var s2 = cljs.core.first(arglist__5724);
-      var sets = cljs.core.rest(arglist__5724);
-      return G__5723__delegate(s1, s2, sets)
-    };
-    G__5723.cljs$core$IFn$_invoke$arity$variadic = G__5723__delegate;
-    return G__5723
-  }();
-  union = function(s1, s2, var_args) {
-    var sets = var_args;
-    switch(arguments.length) {
-      case 0:
-        return union__0.call(this);
-      case 1:
-        return union__1.call(this, s1);
-      case 2:
-        return union__2.call(this, s1, s2);
-      default:
-        return union__3.cljs$core$IFn$_invoke$arity$variadic(s1, s2, cljs.core.array_seq(arguments, 2))
-    }
-    throw new Error("Invalid arity: " + arguments.length);
-  };
-  union.cljs$lang$maxFixedArity = 2;
-  union.cljs$lang$applyTo = union__3.cljs$lang$applyTo;
-  union.cljs$core$IFn$_invoke$arity$0 = union__0;
-  union.cljs$core$IFn$_invoke$arity$1 = union__1;
-  union.cljs$core$IFn$_invoke$arity$2 = union__2;
-  union.cljs$core$IFn$_invoke$arity$variadic = union__3.cljs$core$IFn$_invoke$arity$variadic;
-  return union
-}();
-clojure.set.intersection = function() {
-  var intersection = null;
-  var intersection__1 = function(s1) {
-    return s1
-  };
-  var intersection__2 = function(s1, s2) {
-    while(true) {
-      if(cljs.core.count.call(null, s2) < cljs.core.count.call(null, s1)) {
-        var G__5725 = s2;
-        var G__5726 = s1;
-        s1 = G__5725;
-        s2 = G__5726;
-        continue
-      }else {
-        return cljs.core.reduce.call(null, function(s1, s2) {
-          return function(result, item) {
-            if(cljs.core.contains_QMARK_.call(null, s2, item)) {
-              return result
-            }else {
-              return cljs.core.disj.call(null, result, item)
-            }
-          }
-        }(s1, s2), s1, s1)
-      }
-      break
-    }
-  };
-  var intersection__3 = function() {
-    var G__5727__delegate = function(s1, s2, sets) {
-      var bubbled_sets = clojure.set.bubble_max_key.call(null, function(p1__5722_SHARP_) {
-        return-cljs.core.count.call(null, p1__5722_SHARP_)
-      }, cljs.core.conj.call(null, sets, s2, s1));
-      return cljs.core.reduce.call(null, intersection, cljs.core.first.call(null, bubbled_sets), cljs.core.rest.call(null, bubbled_sets))
-    };
-    var G__5727 = function(s1, s2, var_args) {
-      var sets = null;
-      if(arguments.length > 2) {
-        sets = cljs.core.array_seq(Array.prototype.slice.call(arguments, 2), 0)
-      }
-      return G__5727__delegate.call(this, s1, s2, sets)
-    };
-    G__5727.cljs$lang$maxFixedArity = 2;
-    G__5727.cljs$lang$applyTo = function(arglist__5728) {
-      var s1 = cljs.core.first(arglist__5728);
-      arglist__5728 = cljs.core.next(arglist__5728);
-      var s2 = cljs.core.first(arglist__5728);
-      var sets = cljs.core.rest(arglist__5728);
-      return G__5727__delegate(s1, s2, sets)
-    };
-    G__5727.cljs$core$IFn$_invoke$arity$variadic = G__5727__delegate;
-    return G__5727
-  }();
-  intersection = function(s1, s2, var_args) {
-    var sets = var_args;
-    switch(arguments.length) {
-      case 1:
-        return intersection__1.call(this, s1);
-      case 2:
-        return intersection__2.call(this, s1, s2);
-      default:
-        return intersection__3.cljs$core$IFn$_invoke$arity$variadic(s1, s2, cljs.core.array_seq(arguments, 2))
-    }
-    throw new Error("Invalid arity: " + arguments.length);
-  };
-  intersection.cljs$lang$maxFixedArity = 2;
-  intersection.cljs$lang$applyTo = intersection__3.cljs$lang$applyTo;
-  intersection.cljs$core$IFn$_invoke$arity$1 = intersection__1;
-  intersection.cljs$core$IFn$_invoke$arity$2 = intersection__2;
-  intersection.cljs$core$IFn$_invoke$arity$variadic = intersection__3.cljs$core$IFn$_invoke$arity$variadic;
-  return intersection
-}();
-clojure.set.difference = function() {
-  var difference = null;
-  var difference__1 = function(s1) {
-    return s1
-  };
-  var difference__2 = function(s1, s2) {
-    if(cljs.core.count.call(null, s1) < cljs.core.count.call(null, s2)) {
-      return cljs.core.reduce.call(null, function(result, item) {
-        if(cljs.core.contains_QMARK_.call(null, s2, item)) {
-          return cljs.core.disj.call(null, result, item)
-        }else {
-          return result
-        }
-      }, s1, s1)
-    }else {
-      return cljs.core.reduce.call(null, cljs.core.disj, s1, s2)
-    }
-  };
-  var difference__3 = function() {
-    var G__5729__delegate = function(s1, s2, sets) {
-      return cljs.core.reduce.call(null, difference, s1, cljs.core.conj.call(null, sets, s2))
-    };
-    var G__5729 = function(s1, s2, var_args) {
-      var sets = null;
-      if(arguments.length > 2) {
-        sets = cljs.core.array_seq(Array.prototype.slice.call(arguments, 2), 0)
-      }
-      return G__5729__delegate.call(this, s1, s2, sets)
-    };
-    G__5729.cljs$lang$maxFixedArity = 2;
-    G__5729.cljs$lang$applyTo = function(arglist__5730) {
-      var s1 = cljs.core.first(arglist__5730);
-      arglist__5730 = cljs.core.next(arglist__5730);
-      var s2 = cljs.core.first(arglist__5730);
-      var sets = cljs.core.rest(arglist__5730);
-      return G__5729__delegate(s1, s2, sets)
-    };
-    G__5729.cljs$core$IFn$_invoke$arity$variadic = G__5729__delegate;
-    return G__5729
-  }();
-  difference = function(s1, s2, var_args) {
-    var sets = var_args;
-    switch(arguments.length) {
-      case 1:
-        return difference__1.call(this, s1);
-      case 2:
-        return difference__2.call(this, s1, s2);
-      default:
-        return difference__3.cljs$core$IFn$_invoke$arity$variadic(s1, s2, cljs.core.array_seq(arguments, 2))
-    }
-    throw new Error("Invalid arity: " + arguments.length);
-  };
-  difference.cljs$lang$maxFixedArity = 2;
-  difference.cljs$lang$applyTo = difference__3.cljs$lang$applyTo;
-  difference.cljs$core$IFn$_invoke$arity$1 = difference__1;
-  difference.cljs$core$IFn$_invoke$arity$2 = difference__2;
-  difference.cljs$core$IFn$_invoke$arity$variadic = difference__3.cljs$core$IFn$_invoke$arity$variadic;
-  return difference
-}();
-clojure.set.select = function select(pred, xset) {
-  return cljs.core.reduce.call(null, function(s, k) {
-    if(cljs.core.truth_(pred.call(null, k))) {
-      return s
-    }else {
-      return cljs.core.disj.call(null, s, k)
-    }
-  }, xset, xset)
-};
-clojure.set.project = function project(xrel, ks) {
-  return cljs.core.set.call(null, cljs.core.map.call(null, function(p1__5731_SHARP_) {
-    return cljs.core.select_keys.call(null, p1__5731_SHARP_, ks)
-  }, xrel))
-};
-clojure.set.rename_keys = function rename_keys(map, kmap) {
-  return cljs.core.reduce.call(null, function(m, p__5735) {
-    var vec__5736 = p__5735;
-    var old = cljs.core.nth.call(null, vec__5736, 0, null);
-    var new$ = cljs.core.nth.call(null, vec__5736, 1, null);
-    if(function() {
-      var and__3941__auto__ = cljs.core.not_EQ_.call(null, old, new$);
-      if(and__3941__auto__) {
-        return cljs.core.contains_QMARK_.call(null, m, old)
-      }else {
-        return and__3941__auto__
-      }
-    }()) {
-      return cljs.core.dissoc.call(null, cljs.core.assoc.call(null, m, new$, cljs.core.get.call(null, m, old)), old)
-    }else {
-      return m
-    }
-  }, map, kmap)
-};
-clojure.set.rename = function rename(xrel, kmap) {
-  return cljs.core.set.call(null, cljs.core.map.call(null, function(p1__5732_SHARP_) {
-    return clojure.set.rename_keys.call(null, p1__5732_SHARP_, kmap)
-  }, xrel))
-};
-clojure.set.index = function index(xrel, ks) {
-  return cljs.core.reduce.call(null, function(m, x) {
-    var ik = cljs.core.select_keys.call(null, x, ks);
-    return cljs.core.assoc.call(null, m, ik, cljs.core.conj.call(null, cljs.core.get.call(null, m, ik, cljs.core.PersistentHashSet.EMPTY), x))
-  }, cljs.core.ObjMap.EMPTY, xrel)
-};
-clojure.set.map_invert = function map_invert(m) {
-  return cljs.core.reduce.call(null, function(m__$1, p__5743) {
-    var vec__5744 = p__5743;
-    var k = cljs.core.nth.call(null, vec__5744, 0, null);
-    var v = cljs.core.nth.call(null, vec__5744, 1, null);
-    return cljs.core.assoc.call(null, m__$1, v, k)
-  }, cljs.core.ObjMap.EMPTY, m)
-};
-clojure.set.join = function() {
-  var join = null;
-  var join__2 = function(xrel, yrel) {
-    if(function() {
-      var and__3941__auto__ = cljs.core.seq.call(null, xrel);
-      if(and__3941__auto__) {
-        return cljs.core.seq.call(null, yrel)
-      }else {
-        return and__3941__auto__
-      }
-    }()) {
-      var ks = clojure.set.intersection.call(null, cljs.core.set.call(null, cljs.core.keys.call(null, cljs.core.first.call(null, xrel))), cljs.core.set.call(null, cljs.core.keys.call(null, cljs.core.first.call(null, yrel))));
-      var vec__5748 = cljs.core.count.call(null, xrel) <= cljs.core.count.call(null, yrel) ? cljs.core.PersistentVector.fromArray([xrel, yrel], true) : cljs.core.PersistentVector.fromArray([yrel, xrel], true);
-      var r = cljs.core.nth.call(null, vec__5748, 0, null);
-      var s = cljs.core.nth.call(null, vec__5748, 1, null);
-      var idx = clojure.set.index.call(null, r, ks);
-      return cljs.core.reduce.call(null, function(ret, x) {
-        var found = idx.call(null, cljs.core.select_keys.call(null, x, ks));
-        if(cljs.core.truth_(found)) {
-          return cljs.core.reduce.call(null, function(p1__5737_SHARP_, p2__5738_SHARP_) {
-            return cljs.core.conj.call(null, p1__5737_SHARP_, cljs.core.merge.call(null, p2__5738_SHARP_, x))
-          }, ret, found)
-        }else {
-          return ret
-        }
-      }, cljs.core.PersistentHashSet.EMPTY, s)
-    }else {
-      return cljs.core.PersistentHashSet.EMPTY
-    }
-  };
-  var join__3 = function(xrel, yrel, km) {
-    var vec__5749 = cljs.core.count.call(null, xrel) <= cljs.core.count.call(null, yrel) ? cljs.core.PersistentVector.fromArray([xrel, yrel, clojure.set.map_invert.call(null, km)], true) : cljs.core.PersistentVector.fromArray([yrel, xrel, km], true);
-    var r = cljs.core.nth.call(null, vec__5749, 0, null);
-    var s = cljs.core.nth.call(null, vec__5749, 1, null);
-    var k = cljs.core.nth.call(null, vec__5749, 2, null);
-    var idx = clojure.set.index.call(null, r, cljs.core.vals.call(null, k));
-    return cljs.core.reduce.call(null, function(ret, x) {
-      var found = idx.call(null, clojure.set.rename_keys.call(null, cljs.core.select_keys.call(null, x, cljs.core.keys.call(null, k)), k));
-      if(cljs.core.truth_(found)) {
-        return cljs.core.reduce.call(null, function(p1__5739_SHARP_, p2__5740_SHARP_) {
-          return cljs.core.conj.call(null, p1__5739_SHARP_, cljs.core.merge.call(null, p2__5740_SHARP_, x))
-        }, ret, found)
-      }else {
-        return ret
-      }
-    }, cljs.core.PersistentHashSet.EMPTY, s)
-  };
-  join = function(xrel, yrel, km) {
-    switch(arguments.length) {
-      case 2:
-        return join__2.call(this, xrel, yrel);
-      case 3:
-        return join__3.call(this, xrel, yrel, km)
-    }
-    throw new Error("Invalid arity: " + arguments.length);
-  };
-  join.cljs$core$IFn$_invoke$arity$2 = join__2;
-  join.cljs$core$IFn$_invoke$arity$3 = join__3;
-  return join
-}();
-clojure.set.subset_QMARK_ = function subset_QMARK_(set1, set2) {
-  var and__3941__auto__ = cljs.core.count.call(null, set1) <= cljs.core.count.call(null, set2);
-  if(and__3941__auto__) {
-    return cljs.core.every_QMARK_.call(null, function(p1__5745_SHARP_) {
-      return cljs.core.contains_QMARK_.call(null, set2, p1__5745_SHARP_)
-    }, set1)
-  }else {
-    return and__3941__auto__
-  }
-};
-clojure.set.superset_QMARK_ = function superset_QMARK_(set1, set2) {
-  var and__3941__auto__ = cljs.core.count.call(null, set1) >= cljs.core.count.call(null, set2);
-  if(and__3941__auto__) {
-    return cljs.core.every_QMARK_.call(null, function(p1__5750_SHARP_) {
-      return cljs.core.contains_QMARK_.call(null, set1, p1__5750_SHARP_)
-    }, set2)
-  }else {
-    return and__3941__auto__
-  }
-};
-goog.provide("webfui.state_patches");
-goog.require("cljs.core");
-goog.require("clojure.set");
-goog.require("clojure.set");
-webfui.state_patches.patch = function patch(state, diff) {
-  if(cljs.core.truth_(diff)) {
-    if(cljs.core.map_QMARK_.call(null, state)) {
-      return cljs.core.into.call(null, cljs.core.ObjMap.EMPTY, function() {
-        var iter__3042__auto__ = function iter__5890(s__5891) {
-          return new cljs.core.LazySeq(null, false, function() {
-            var s__5891__$1 = s__5891;
-            while(true) {
-              var temp__4092__auto__ = cljs.core.seq.call(null, s__5891__$1);
-              if(temp__4092__auto__) {
-                var s__5891__$2 = temp__4092__auto__;
-                if(cljs.core.chunked_seq_QMARK_.call(null, s__5891__$2)) {
-                  var c__3040__auto__ = cljs.core.chunk_first.call(null, s__5891__$2);
-                  var size__3041__auto__ = cljs.core.count.call(null, c__3040__auto__);
-                  var b__5893 = cljs.core.chunk_buffer.call(null, size__3041__auto__);
-                  if(function() {
-                    var i__5892 = 0;
-                    while(true) {
-                      if(i__5892 < size__3041__auto__) {
-                        var key = cljs.core._nth.call(null, c__3040__auto__, i__5892);
-                        cljs.core.chunk_append.call(null, b__5893, cljs.core.PersistentVector.fromArray([key, function() {
-                          var val1 = state.call(null, key);
-                          var val2 = diff.call(null, key);
-                          if(cljs.core.truth_(function() {
-                            var and__3941__auto__ = val1;
-                            if(cljs.core.truth_(and__3941__auto__)) {
-                              return val2
-                            }else {
-                              return and__3941__auto__
-                            }
-                          }())) {
-                            return patch.call(null, val1, val2)
-                          }else {
-                            if(cljs.core.contains_QMARK_.call(null, diff, key)) {
-                              return val2
-                            }else {
-                              if("\ufdd0:else") {
-                                return val1
-                              }else {
-                                return null
-                              }
-                            }
-                          }
-                        }()], true));
-                        var G__5894 = i__5892 + 1;
-                        i__5892 = G__5894;
-                        continue
-                      }else {
-                        return true
-                      }
-                      break
-                    }
-                  }()) {
-                    return cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, b__5893), iter__5890.call(null, cljs.core.chunk_rest.call(null, s__5891__$2)))
-                  }else {
-                    return cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, b__5893), null)
-                  }
-                }else {
-                  var key = cljs.core.first.call(null, s__5891__$2);
-                  return cljs.core.cons.call(null, cljs.core.PersistentVector.fromArray([key, function() {
-                    var val1 = state.call(null, key);
-                    var val2 = diff.call(null, key);
-                    if(cljs.core.truth_(function() {
-                      var and__3941__auto__ = val1;
-                      if(cljs.core.truth_(and__3941__auto__)) {
-                        return val2
-                      }else {
-                        return and__3941__auto__
-                      }
-                    }())) {
-                      return patch.call(null, val1, val2)
-                    }else {
-                      if(cljs.core.contains_QMARK_.call(null, diff, key)) {
-                        return val2
-                      }else {
-                        if("\ufdd0:else") {
-                          return val1
-                        }else {
-                          return null
-                        }
-                      }
-                    }
-                  }()], true), iter__5890.call(null, cljs.core.rest.call(null, s__5891__$2)))
-                }
-              }else {
-                return null
-              }
-              break
-            }
-          }, null)
-        };
-        return iter__3042__auto__.call(null, clojure.set.union.call(null, cljs.core.set.call(null, cljs.core.keys.call(null, state)), cljs.core.set.call(null, cljs.core.keys.call(null, diff))))
-      }())
-    }else {
-      if(cljs.core.vector_QMARK_.call(null, state)) {
-        if(cljs.core.map_QMARK_.call(null, diff)) {
-          return cljs.core.vec.call(null, cljs.core.map_indexed.call(null, function(index, item) {
-            var temp__4090__auto__ = diff.call(null, index);
-            if(cljs.core.truth_(temp__4090__auto__)) {
-              var d = temp__4090__auto__;
-              return patch.call(null, item, d)
-            }else {
-              return item
-            }
-          }, state))
-        }else {
-          return diff
-        }
-      }else {
-        if("\ufdd0:else") {
-          return diff
-        }else {
-          return null
-        }
-      }
-    }
-  }else {
-    return state
-  }
-};
-goog.provide("webfui.html");
-goog.require("cljs.core");
-goog.require("clojure.set");
-goog.require("clojure.set");
-goog.provide("webfui.html.parsed_tagname");
-webfui.html.parsed_tagname = function(tagname, id, classes) {
-  this.tagname = tagname;
-  this.id = id;
-  this.classes = classes
-};
-webfui.html.parsed_tagname.cljs$lang$type = true;
-webfui.html.parsed_tagname.cljs$lang$ctorStr = "webfui.html/parsed-tagname";
-webfui.html.parsed_tagname.cljs$lang$ctorPrWriter = function(this__2885__auto__, writer__2886__auto__, opts__2887__auto__) {
-  return cljs.core._write.call(null, writer__2886__auto__, "webfui.html/parsed-tagname")
-};
-goog.provide("webfui.html.parsed_html");
-webfui.html.parsed_html = function(tagname, attributes, children) {
-  this.tagname = tagname;
-  this.attributes = attributes;
-  this.children = children
-};
-webfui.html.parsed_html.cljs$lang$type = true;
-webfui.html.parsed_html.cljs$lang$ctorStr = "webfui.html/parsed-html";
-webfui.html.parsed_html.cljs$lang$ctorPrWriter = function(this__2885__auto__, writer__2886__auto__, opts__2887__auto__) {
-  return cljs.core._write.call(null, writer__2886__auto__, "webfui.html/parsed-html")
-};
-webfui.html.parse_tagname = function parse_tagname(tagname) {
-  var vec__5667 = cljs.core.re_matches.call(null, /^([^.^#]+)(#([^.]+))?(\..+)?/, tagname);
-  var _ = cljs.core.nth.call(null, vec__5667, 0, null);
-  var name = cljs.core.nth.call(null, vec__5667, 1, null);
-  var ___$1 = cljs.core.nth.call(null, vec__5667, 2, null);
-  var id = cljs.core.nth.call(null, vec__5667, 3, null);
-  var classes = cljs.core.nth.call(null, vec__5667, 4, null);
-  return new webfui.html.parsed_tagname(cljs.core.keyword.call(null, name), cljs.core.truth_(id) ? cljs.core.keyword.call(null, id) : null, cljs.core.truth_(classes) ? cljs.core.map.call(null, cljs.core.second, cljs.core.re_seq.call(null, /\.([^.]+)/, classes)) : null)
-};
-var cache_5668 = cljs.core.atom.call(null, cljs.core.ObjMap.EMPTY);
-webfui.html.parse_tagname_memoized = function parse_tagname_memoized(tagname) {
-  var or__3943__auto__ = cljs.core.deref.call(null, cache_5668).call(null, tagname);
-  if(cljs.core.truth_(or__3943__auto__)) {
-    return or__3943__auto__
-  }else {
-    var val = webfui.html.parse_tagname.call(null, tagname);
-    cljs.core.swap_BANG_.call(null, cache_5668, cljs.core.assoc, tagname, val);
-    return val
-  }
-};
-webfui.html.parse_element = function parse_element(element) {
-  var vec__5672 = element;
-  var tagname = cljs.core.nth.call(null, vec__5672, 0, null);
-  var more = cljs.core.nthnext.call(null, vec__5672, 1);
-  var parsed = webfui.html.parse_tagname_memoized.call(null, tagname);
-  var classes = parsed.classes;
-  var id = parsed.id;
-  var tagname__$1 = parsed.tagname;
-  var attributes = cljs.core.ObjMap.EMPTY;
-  var attributes__$1 = cljs.core.truth_(classes) ? cljs.core.assoc.call(null, attributes, "\ufdd0:class", cljs.core.apply.call(null, cljs.core.str, cljs.core.interpose.call(null, " ", classes))) : attributes;
-  var attributes__$2 = cljs.core.truth_(id) ? cljs.core.assoc.call(null, attributes__$1, "\ufdd0:id", id) : attributes__$1;
-  var vec__5673 = more;
-  var a = cljs.core.nth.call(null, vec__5673, 0, null);
-  var b = cljs.core.nthnext.call(null, vec__5673, 1);
-  var vec__5674 = cljs.core.map_QMARK_.call(null, a) ? cljs.core.PersistentVector.fromArray([cljs.core.merge.call(null, attributes__$2, a), b], true) : cljs.core.PersistentVector.fromArray([attributes__$2, more], true);
-  var attributes__$3 = cljs.core.nth.call(null, vec__5674, 0, null);
-  var children = cljs.core.nth.call(null, vec__5674, 1, null);
-  return new webfui.html.parsed_html(tagname__$1, attributes__$3, webfui.html.parse_html.call(null, children))
-};
-webfui.html.merge_strings = function merge_strings(lst) {
-  var temp__4090__auto__ = lst;
-  if(cljs.core.truth_(temp__4090__auto__)) {
-    var vec__5677 = temp__4090__auto__;
-    var x = cljs.core.nth.call(null, vec__5677, 0, null);
-    var more = cljs.core.nthnext.call(null, vec__5677, 1);
-    var temp__4090__auto____$1 = more;
-    if(cljs.core.truth_(temp__4090__auto____$1)) {
-      var vec__5678 = temp__4090__auto____$1;
-      var y = cljs.core.nth.call(null, vec__5678, 0, null);
-      var more__$1 = cljs.core.nthnext.call(null, vec__5678, 1);
-      if(function() {
-        var and__3941__auto__ = cljs.core.string_QMARK_.call(null, x);
-        if(and__3941__auto__) {
-          return cljs.core.string_QMARK_.call(null, y)
-        }else {
-          return and__3941__auto__
-        }
-      }()) {
-        return merge_strings.call(null, cljs.core.cons.call(null, [cljs.core.str(x), cljs.core.str(y)].join(""), more__$1))
-      }else {
-        return cljs.core.cons.call(null, x, merge_strings.call(null, cljs.core.cons.call(null, y, more__$1)))
-      }
-    }else {
-      return lst
-    }
-  }else {
-    return lst
-  }
-};
-webfui.html.parse_html = function parse_html(html) {
-  return cljs.core.mapcat.call(null, function(x) {
-    if(cljs.core.vector_QMARK_.call(null, x)) {
-      return cljs.core.PersistentVector.fromArray([webfui.html.parse_element.call(null, x)], true)
-    }else {
-      if(function() {
-        var and__3941__auto__ = cljs.core.coll_QMARK_.call(null, x);
-        if(and__3941__auto__) {
-          return!cljs.core.string_QMARK_.call(null, x)
-        }else {
-          return and__3941__auto__
-        }
-      }()) {
-        return parse_html.call(null, x)
-      }else {
-        if("\ufdd0:else") {
-          return cljs.core.PersistentVector.fromArray([x], true)
-        }else {
-          return null
-        }
-      }
-    }
-  }, webfui.html.merge_strings.call(null, html))
-};
-webfui.html.tag = function tag(tagname, atts, s) {
-  if(cljs.core.truth_(cljs.core.PersistentHashSet.fromArray(["\ufdd0:br", null], true).call(null, tagname))) {
-    return[cljs.core.str("<"), cljs.core.str(cljs.core.name.call(null, tagname)), cljs.core.str(atts), cljs.core.str(">")].join("")
-  }else {
-    return[cljs.core.str("<"), cljs.core.str(cljs.core.name.call(null, tagname)), cljs.core.str(atts), cljs.core.str(">"), cljs.core.str(cljs.core.apply.call(null, cljs.core.str, s)), cljs.core.str("</"), cljs.core.str(cljs.core.name.call(null, tagname)), cljs.core.str(">")].join("")
-  }
-};
-webfui.html.pixels = function pixels(k) {
-  return[cljs.core.str(k.toFixed(3)), cljs.core.str("px")].join("")
-};
-webfui.html.render_css = function render_css(css) {
-  return cljs.core.apply.call(null, cljs.core.str, cljs.core.interpose.call(null, ";", function() {
-    var iter__3042__auto__ = function iter__5687(s__5688) {
-      return new cljs.core.LazySeq(null, false, function() {
-        var s__5688__$1 = s__5688;
-        while(true) {
-          var temp__4092__auto__ = cljs.core.seq.call(null, s__5688__$1);
-          if(temp__4092__auto__) {
-            var s__5688__$2 = temp__4092__auto__;
-            if(cljs.core.chunked_seq_QMARK_.call(null, s__5688__$2)) {
-              var c__3040__auto__ = cljs.core.chunk_first.call(null, s__5688__$2);
-              var size__3041__auto__ = cljs.core.count.call(null, c__3040__auto__);
-              var b__5690 = cljs.core.chunk_buffer.call(null, size__3041__auto__);
-              if(function() {
-                var i__5689 = 0;
-                while(true) {
-                  if(i__5689 < size__3041__auto__) {
-                    var vec__5693 = cljs.core._nth.call(null, c__3040__auto__, i__5689);
-                    var k = cljs.core.nth.call(null, vec__5693, 0, null);
-                    var v = cljs.core.nth.call(null, vec__5693, 1, null);
-                    cljs.core.chunk_append.call(null, b__5690, [cljs.core.str(cljs.core.name.call(null, k)), cljs.core.str(":"), cljs.core.str(cljs.core.keyword_QMARK_.call(null, v) ? cljs.core.name.call(null, v) : cljs.core.truth_(function() {
-                      var and__3941__auto__ = typeof v === "number";
-                      if(and__3941__auto__) {
-                        return cljs.core.PersistentHashSet.fromArray(["\ufdd0:bottom", null, "\ufdd0:width", null, "\ufdd0:top", null, "\ufdd0:right", null, "\ufdd0:left", null, "\ufdd0:line-height", null, "\ufdd0:height", null], true).call(null, k)
-                      }else {
-                        return and__3941__auto__
-                      }
-                    }()) ? webfui.html.pixels.call(null, v) : "\ufdd0:else" ? v : null)].join(""));
-                    var G__5695 = i__5689 + 1;
-                    i__5689 = G__5695;
-                    continue
-                  }else {
-                    return true
-                  }
-                  break
-                }
-              }()) {
-                return cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, b__5690), iter__5687.call(null, cljs.core.chunk_rest.call(null, s__5688__$2)))
-              }else {
-                return cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, b__5690), null)
-              }
-            }else {
-              var vec__5694 = cljs.core.first.call(null, s__5688__$2);
-              var k = cljs.core.nth.call(null, vec__5694, 0, null);
-              var v = cljs.core.nth.call(null, vec__5694, 1, null);
-              return cljs.core.cons.call(null, [cljs.core.str(cljs.core.name.call(null, k)), cljs.core.str(":"), cljs.core.str(cljs.core.keyword_QMARK_.call(null, v) ? cljs.core.name.call(null, v) : cljs.core.truth_(function() {
-                var and__3941__auto__ = typeof v === "number";
-                if(and__3941__auto__) {
-                  return cljs.core.PersistentHashSet.fromArray(["\ufdd0:bottom", null, "\ufdd0:width", null, "\ufdd0:top", null, "\ufdd0:right", null, "\ufdd0:left", null, "\ufdd0:line-height", null, "\ufdd0:height", null], true).call(null, k)
-                }else {
-                  return and__3941__auto__
-                }
-              }()) ? webfui.html.pixels.call(null, v) : "\ufdd0:else" ? v : null)].join(""), iter__5687.call(null, cljs.core.rest.call(null, s__5688__$2)))
-            }
-          }else {
-            return null
-          }
-          break
-        }
-      }, null)
-    };
-    return iter__3042__auto__.call(null, css)
-  }()))
-};
-webfui.html.render_attribute_value = function render_attribute_value(key, value) {
-  if(cljs.core.keyword_QMARK_.call(null, value)) {
-    return cljs.core.name.call(null, value)
-  }else {
-    if(cljs.core._EQ_.call(null, key, "\ufdd0:data")) {
-      return cljs.core.print_str.call(null, value)
-    }else {
-      if(cljs.core._EQ_.call(null, key, "\ufdd0:style")) {
-        return webfui.html.render_css.call(null, value)
-      }else {
-        if("\ufdd0:else") {
-          return value
-        }else {
-          return null
-        }
-      }
-    }
-  }
-};
-webfui.html.render_attributes = function render_attributes(atts) {
-  return cljs.core.apply.call(null, cljs.core.str, function() {
-    var iter__3042__auto__ = function iter__5704(s__5705) {
-      return new cljs.core.LazySeq(null, false, function() {
-        var s__5705__$1 = s__5705;
-        while(true) {
-          var temp__4092__auto__ = cljs.core.seq.call(null, s__5705__$1);
-          if(temp__4092__auto__) {
-            var s__5705__$2 = temp__4092__auto__;
-            if(cljs.core.chunked_seq_QMARK_.call(null, s__5705__$2)) {
-              var c__3040__auto__ = cljs.core.chunk_first.call(null, s__5705__$2);
-              var size__3041__auto__ = cljs.core.count.call(null, c__3040__auto__);
-              var b__5707 = cljs.core.chunk_buffer.call(null, size__3041__auto__);
-              if(function() {
-                var i__5706 = 0;
-                while(true) {
-                  if(i__5706 < size__3041__auto__) {
-                    var vec__5710 = cljs.core._nth.call(null, c__3040__auto__, i__5706);
-                    var key = cljs.core.nth.call(null, vec__5710, 0, null);
-                    var value = cljs.core.nth.call(null, vec__5710, 1, null);
-                    cljs.core.chunk_append.call(null, b__5707, [cljs.core.str(" "), cljs.core.str(cljs.core.name.call(null, key)), cljs.core.str('="'), cljs.core.str(webfui.html.render_attribute_value.call(null, key, value)), cljs.core.str('"')].join(""));
-                    var G__5712 = i__5706 + 1;
-                    i__5706 = G__5712;
-                    continue
-                  }else {
-                    return true
-                  }
-                  break
-                }
-              }()) {
-                return cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, b__5707), iter__5704.call(null, cljs.core.chunk_rest.call(null, s__5705__$2)))
-              }else {
-                return cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, b__5707), null)
-              }
-            }else {
-              var vec__5711 = cljs.core.first.call(null, s__5705__$2);
-              var key = cljs.core.nth.call(null, vec__5711, 0, null);
-              var value = cljs.core.nth.call(null, vec__5711, 1, null);
-              return cljs.core.cons.call(null, [cljs.core.str(" "), cljs.core.str(cljs.core.name.call(null, key)), cljs.core.str('="'), cljs.core.str(webfui.html.render_attribute_value.call(null, key, value)), cljs.core.str('"')].join(""), iter__5704.call(null, cljs.core.rest.call(null, s__5705__$2)))
-            }
-          }else {
-            return null
-          }
-          break
-        }
-      }, null)
-    };
-    return iter__3042__auto__.call(null, atts)
-  }())
-};
-webfui.html.html = function html(content) {
-  if(content instanceof webfui.html.parsed_html) {
-    var tagname = content.tagname;
-    var attributes = content.attributes;
-    var children = content.children;
-    if(cljs.core.truth_(tagname)) {
-      return webfui.html.tag.call(null, tagname, cljs.core.truth_(attributes) ? webfui.html.render_attributes.call(null, attributes) : null, cljs.core.map.call(null, html, children))
-    }else {
-      return""
-    }
-  }else {
-    if("\ufdd0:else") {
-      return[cljs.core.str(content)].join("")
-    }else {
-      return null
-    }
-  }
-};
-webfui.html.html_delta = function html_delta(old_html, new_html, path) {
-  if(cljs.core._EQ_.call(null, cljs.core.count.call(null, old_html), cljs.core.count.call(null, new_html))) {
-    var pairs = cljs.core.map.call(null, cljs.core.vector, old_html, new_html);
-    var fixable = cljs.core.every_QMARK_.call(null, function(pairs) {
-      return function(p__5717) {
-        var vec__5718 = p__5717;
-        var old_child = cljs.core.nth.call(null, vec__5718, 0, null);
-        var new_child = cljs.core.nth.call(null, vec__5718, 1, null);
-        if(function() {
-          var and__3941__auto__ = old_child instanceof webfui.html.parsed_html;
-          if(and__3941__auto__) {
-            return new_child instanceof webfui.html.parsed_html
-          }else {
-            return and__3941__auto__
-          }
-        }()) {
-          return cljs.core._EQ_.call(null, old_child.tagname, new_child.tagname)
-        }else {
-          return cljs.core._EQ_.call(null, old_child, new_child)
-        }
-      }
-    }(pairs), pairs);
-    if(fixable) {
-      return cljs.core.apply.call(null, cljs.core.concat, cljs.core.map_indexed.call(null, function(i, p__5719) {
-        var vec__5720 = p__5719;
-        var old_element = cljs.core.nth.call(null, vec__5720, 0, null);
-        var new_element = cljs.core.nth.call(null, vec__5720, 1, null);
-        if(old_element instanceof webfui.html.parsed_html) {
-          var old_tagname = old_element.tagname;
-          var old_attributes = old_element.attributes;
-          var old_children = old_element.children;
-          var new_tagname = new_element.tagname;
-          var new_attributes = new_element.attributes;
-          var new_children = new_element.children;
-          var path__$1 = cljs.core.conj.call(null, path, i);
-          var att_delta = cljs.core.not_EQ_.call(null, old_attributes, new_attributes) ? cljs.core.mapcat.call(null, function(old_tagname, old_attributes, old_children, new_tagname, new_attributes, new_children, path__$1) {
-            return function(key) {
-              var old_val = old_attributes.call(null, key);
-              var new_val = new_attributes.call(null, key);
-              if(cljs.core.not.call(null, new_val)) {
-                return cljs.core.PersistentVector.fromArray([cljs.core.PersistentVector.fromArray(["\ufdd0:rem-att", path__$1, key], true)], true)
-              }else {
-                if(cljs.core.not_EQ_.call(null, old_val, new_val)) {
-                  return cljs.core.PersistentVector.fromArray([cljs.core.PersistentVector.fromArray(["\ufdd0:att", path__$1, key, new_val], true)], true)
-                }else {
-                  if("\ufdd0:else") {
-                    return cljs.core.PersistentVector.EMPTY
-                  }else {
-                    return null
-                  }
-                }
-              }
-            }
-          }(old_tagname, old_attributes, old_children, new_tagname, new_attributes, new_children, path__$1), clojure.set.union.call(null, cljs.core.set.call(null, cljs.core.keys.call(null, old_attributes)), cljs.core.set.call(null, cljs.core.keys.call(null, new_attributes)))) : null;
-          var child_delta = html_delta.call(null, old_children, new_children, path__$1);
-          return cljs.core.concat.call(null, att_delta, child_delta)
-        }else {
-          return null
-        }
-      }, pairs))
-    }else {
-      return cljs.core.PersistentVector.fromArray([cljs.core.PersistentVector.fromArray(["\ufdd0:html", path, new_html], true)], true)
-    }
-  }else {
-    return cljs.core.PersistentVector.fromArray([cljs.core.PersistentVector.fromArray(["\ufdd0:html", path, new_html], true)], true)
-  }
-};
-webfui.html.unparse_html = function unparse_html(html) {
-  if(function() {
-    var or__3943__auto__ = cljs.core.string_QMARK_.call(null, html);
-    if(or__3943__auto__) {
-      return or__3943__auto__
-    }else {
-      return typeof html === "number"
-    }
-  }()) {
-    return html
-  }else {
-    var tagname = html.tagname;
-    var attributes = html.attributes;
-    var children = html.children;
-    return cljs.core.vec.call(null, cljs.core.concat.call(null, cljs.core.PersistentVector.fromArray([tagname, attributes], true), cljs.core.map.call(null, unparse_html, children)))
-  }
-};
-goog.provide("webfui.dom_manipulation");
-goog.require("cljs.core");
-goog.require("webfui.html");
-goog.require("webfui.html");
-webfui.dom_manipulation.path_dom = function path_dom(node) {
-  return cljs.core.drop.call(null, 3, cljs.core.reverse.call(null, function f(node__$1) {
-    return new cljs.core.LazySeq(null, false, function() {
-      if(cljs.core.truth_(node__$1)) {
-        return cljs.core.cons.call(null, cljs.core.count.call(null, cljs.core.take_while.call(null, cljs.core.identity, cljs.core.iterate.call(null, function(p1__5661_SHARP_) {
-          return p1__5661_SHARP_.previousSibling
-        }, node__$1))) - 1, f.call(null, node__$1.parentNode))
-      }else {
-        return null
-      }
-    }, null)
-  }.call(null, node)))
-};
-webfui.dom_manipulation.select_path_html = function select_path_html(html, path) {
-  while(true) {
-    var temp__4090__auto__ = cljs.core.seq.call(null, path);
-    if(temp__4090__auto__) {
-      var vec__5663 = temp__4090__auto__;
-      var cur = cljs.core.nth.call(null, vec__5663, 0, null);
-      var more = cljs.core.nthnext.call(null, vec__5663, 1);
-      var G__5664 = cljs.core.nth.call(null, html.children, cur);
-      var G__5665 = more;
-      html = G__5664;
-      path = G__5665;
-      continue
-    }else {
-      return html
-    }
-    break
-  }
-};
-webfui.dom_manipulation.resolve_target = function resolve_target(parsed_html, target) {
-  var path = webfui.dom_manipulation.path_dom.call(null, target);
-  var parsed_element = webfui.dom_manipulation.select_path_html.call(null, parsed_html, path);
-  return webfui.html.unparse_html.call(null, parsed_element)
 };
 goog.provide("cljs.reader");
 goog.require("cljs.core");
@@ -23668,6 +22889,1071 @@ webfui.plugin.core.fix_dom = function fix_dom(this$) {
 webfui.plugin.core.register_plugin = function register_plugin(plugin) {
   return cljs.core.swap_BANG_.call(null, webfui.plugin.core.active_plugins, cljs.core.conj, plugin)
 };
+goog.provide("clojure.set");
+goog.require("cljs.core");
+clojure.set.bubble_max_key = function bubble_max_key(k, coll) {
+  var max = cljs.core.apply.call(null, cljs.core.max_key, k, coll);
+  return cljs.core.cons.call(null, max, cljs.core.remove.call(null, function(p1__5721_SHARP_) {
+    return max === p1__5721_SHARP_
+  }, coll))
+};
+clojure.set.union = function() {
+  var union = null;
+  var union__0 = function() {
+    return cljs.core.PersistentHashSet.EMPTY
+  };
+  var union__1 = function(s1) {
+    return s1
+  };
+  var union__2 = function(s1, s2) {
+    if(cljs.core.count.call(null, s1) < cljs.core.count.call(null, s2)) {
+      return cljs.core.reduce.call(null, cljs.core.conj, s2, s1)
+    }else {
+      return cljs.core.reduce.call(null, cljs.core.conj, s1, s2)
+    }
+  };
+  var union__3 = function() {
+    var G__5723__delegate = function(s1, s2, sets) {
+      var bubbled_sets = clojure.set.bubble_max_key.call(null, cljs.core.count, cljs.core.conj.call(null, sets, s2, s1));
+      return cljs.core.reduce.call(null, cljs.core.into, cljs.core.first.call(null, bubbled_sets), cljs.core.rest.call(null, bubbled_sets))
+    };
+    var G__5723 = function(s1, s2, var_args) {
+      var sets = null;
+      if(arguments.length > 2) {
+        sets = cljs.core.array_seq(Array.prototype.slice.call(arguments, 2), 0)
+      }
+      return G__5723__delegate.call(this, s1, s2, sets)
+    };
+    G__5723.cljs$lang$maxFixedArity = 2;
+    G__5723.cljs$lang$applyTo = function(arglist__5724) {
+      var s1 = cljs.core.first(arglist__5724);
+      arglist__5724 = cljs.core.next(arglist__5724);
+      var s2 = cljs.core.first(arglist__5724);
+      var sets = cljs.core.rest(arglist__5724);
+      return G__5723__delegate(s1, s2, sets)
+    };
+    G__5723.cljs$core$IFn$_invoke$arity$variadic = G__5723__delegate;
+    return G__5723
+  }();
+  union = function(s1, s2, var_args) {
+    var sets = var_args;
+    switch(arguments.length) {
+      case 0:
+        return union__0.call(this);
+      case 1:
+        return union__1.call(this, s1);
+      case 2:
+        return union__2.call(this, s1, s2);
+      default:
+        return union__3.cljs$core$IFn$_invoke$arity$variadic(s1, s2, cljs.core.array_seq(arguments, 2))
+    }
+    throw new Error("Invalid arity: " + arguments.length);
+  };
+  union.cljs$lang$maxFixedArity = 2;
+  union.cljs$lang$applyTo = union__3.cljs$lang$applyTo;
+  union.cljs$core$IFn$_invoke$arity$0 = union__0;
+  union.cljs$core$IFn$_invoke$arity$1 = union__1;
+  union.cljs$core$IFn$_invoke$arity$2 = union__2;
+  union.cljs$core$IFn$_invoke$arity$variadic = union__3.cljs$core$IFn$_invoke$arity$variadic;
+  return union
+}();
+clojure.set.intersection = function() {
+  var intersection = null;
+  var intersection__1 = function(s1) {
+    return s1
+  };
+  var intersection__2 = function(s1, s2) {
+    while(true) {
+      if(cljs.core.count.call(null, s2) < cljs.core.count.call(null, s1)) {
+        var G__5725 = s2;
+        var G__5726 = s1;
+        s1 = G__5725;
+        s2 = G__5726;
+        continue
+      }else {
+        return cljs.core.reduce.call(null, function(s1, s2) {
+          return function(result, item) {
+            if(cljs.core.contains_QMARK_.call(null, s2, item)) {
+              return result
+            }else {
+              return cljs.core.disj.call(null, result, item)
+            }
+          }
+        }(s1, s2), s1, s1)
+      }
+      break
+    }
+  };
+  var intersection__3 = function() {
+    var G__5727__delegate = function(s1, s2, sets) {
+      var bubbled_sets = clojure.set.bubble_max_key.call(null, function(p1__5722_SHARP_) {
+        return-cljs.core.count.call(null, p1__5722_SHARP_)
+      }, cljs.core.conj.call(null, sets, s2, s1));
+      return cljs.core.reduce.call(null, intersection, cljs.core.first.call(null, bubbled_sets), cljs.core.rest.call(null, bubbled_sets))
+    };
+    var G__5727 = function(s1, s2, var_args) {
+      var sets = null;
+      if(arguments.length > 2) {
+        sets = cljs.core.array_seq(Array.prototype.slice.call(arguments, 2), 0)
+      }
+      return G__5727__delegate.call(this, s1, s2, sets)
+    };
+    G__5727.cljs$lang$maxFixedArity = 2;
+    G__5727.cljs$lang$applyTo = function(arglist__5728) {
+      var s1 = cljs.core.first(arglist__5728);
+      arglist__5728 = cljs.core.next(arglist__5728);
+      var s2 = cljs.core.first(arglist__5728);
+      var sets = cljs.core.rest(arglist__5728);
+      return G__5727__delegate(s1, s2, sets)
+    };
+    G__5727.cljs$core$IFn$_invoke$arity$variadic = G__5727__delegate;
+    return G__5727
+  }();
+  intersection = function(s1, s2, var_args) {
+    var sets = var_args;
+    switch(arguments.length) {
+      case 1:
+        return intersection__1.call(this, s1);
+      case 2:
+        return intersection__2.call(this, s1, s2);
+      default:
+        return intersection__3.cljs$core$IFn$_invoke$arity$variadic(s1, s2, cljs.core.array_seq(arguments, 2))
+    }
+    throw new Error("Invalid arity: " + arguments.length);
+  };
+  intersection.cljs$lang$maxFixedArity = 2;
+  intersection.cljs$lang$applyTo = intersection__3.cljs$lang$applyTo;
+  intersection.cljs$core$IFn$_invoke$arity$1 = intersection__1;
+  intersection.cljs$core$IFn$_invoke$arity$2 = intersection__2;
+  intersection.cljs$core$IFn$_invoke$arity$variadic = intersection__3.cljs$core$IFn$_invoke$arity$variadic;
+  return intersection
+}();
+clojure.set.difference = function() {
+  var difference = null;
+  var difference__1 = function(s1) {
+    return s1
+  };
+  var difference__2 = function(s1, s2) {
+    if(cljs.core.count.call(null, s1) < cljs.core.count.call(null, s2)) {
+      return cljs.core.reduce.call(null, function(result, item) {
+        if(cljs.core.contains_QMARK_.call(null, s2, item)) {
+          return cljs.core.disj.call(null, result, item)
+        }else {
+          return result
+        }
+      }, s1, s1)
+    }else {
+      return cljs.core.reduce.call(null, cljs.core.disj, s1, s2)
+    }
+  };
+  var difference__3 = function() {
+    var G__5729__delegate = function(s1, s2, sets) {
+      return cljs.core.reduce.call(null, difference, s1, cljs.core.conj.call(null, sets, s2))
+    };
+    var G__5729 = function(s1, s2, var_args) {
+      var sets = null;
+      if(arguments.length > 2) {
+        sets = cljs.core.array_seq(Array.prototype.slice.call(arguments, 2), 0)
+      }
+      return G__5729__delegate.call(this, s1, s2, sets)
+    };
+    G__5729.cljs$lang$maxFixedArity = 2;
+    G__5729.cljs$lang$applyTo = function(arglist__5730) {
+      var s1 = cljs.core.first(arglist__5730);
+      arglist__5730 = cljs.core.next(arglist__5730);
+      var s2 = cljs.core.first(arglist__5730);
+      var sets = cljs.core.rest(arglist__5730);
+      return G__5729__delegate(s1, s2, sets)
+    };
+    G__5729.cljs$core$IFn$_invoke$arity$variadic = G__5729__delegate;
+    return G__5729
+  }();
+  difference = function(s1, s2, var_args) {
+    var sets = var_args;
+    switch(arguments.length) {
+      case 1:
+        return difference__1.call(this, s1);
+      case 2:
+        return difference__2.call(this, s1, s2);
+      default:
+        return difference__3.cljs$core$IFn$_invoke$arity$variadic(s1, s2, cljs.core.array_seq(arguments, 2))
+    }
+    throw new Error("Invalid arity: " + arguments.length);
+  };
+  difference.cljs$lang$maxFixedArity = 2;
+  difference.cljs$lang$applyTo = difference__3.cljs$lang$applyTo;
+  difference.cljs$core$IFn$_invoke$arity$1 = difference__1;
+  difference.cljs$core$IFn$_invoke$arity$2 = difference__2;
+  difference.cljs$core$IFn$_invoke$arity$variadic = difference__3.cljs$core$IFn$_invoke$arity$variadic;
+  return difference
+}();
+clojure.set.select = function select(pred, xset) {
+  return cljs.core.reduce.call(null, function(s, k) {
+    if(cljs.core.truth_(pred.call(null, k))) {
+      return s
+    }else {
+      return cljs.core.disj.call(null, s, k)
+    }
+  }, xset, xset)
+};
+clojure.set.project = function project(xrel, ks) {
+  return cljs.core.set.call(null, cljs.core.map.call(null, function(p1__5731_SHARP_) {
+    return cljs.core.select_keys.call(null, p1__5731_SHARP_, ks)
+  }, xrel))
+};
+clojure.set.rename_keys = function rename_keys(map, kmap) {
+  return cljs.core.reduce.call(null, function(m, p__5735) {
+    var vec__5736 = p__5735;
+    var old = cljs.core.nth.call(null, vec__5736, 0, null);
+    var new$ = cljs.core.nth.call(null, vec__5736, 1, null);
+    if(function() {
+      var and__3941__auto__ = cljs.core.not_EQ_.call(null, old, new$);
+      if(and__3941__auto__) {
+        return cljs.core.contains_QMARK_.call(null, m, old)
+      }else {
+        return and__3941__auto__
+      }
+    }()) {
+      return cljs.core.dissoc.call(null, cljs.core.assoc.call(null, m, new$, cljs.core.get.call(null, m, old)), old)
+    }else {
+      return m
+    }
+  }, map, kmap)
+};
+clojure.set.rename = function rename(xrel, kmap) {
+  return cljs.core.set.call(null, cljs.core.map.call(null, function(p1__5732_SHARP_) {
+    return clojure.set.rename_keys.call(null, p1__5732_SHARP_, kmap)
+  }, xrel))
+};
+clojure.set.index = function index(xrel, ks) {
+  return cljs.core.reduce.call(null, function(m, x) {
+    var ik = cljs.core.select_keys.call(null, x, ks);
+    return cljs.core.assoc.call(null, m, ik, cljs.core.conj.call(null, cljs.core.get.call(null, m, ik, cljs.core.PersistentHashSet.EMPTY), x))
+  }, cljs.core.ObjMap.EMPTY, xrel)
+};
+clojure.set.map_invert = function map_invert(m) {
+  return cljs.core.reduce.call(null, function(m__$1, p__5743) {
+    var vec__5744 = p__5743;
+    var k = cljs.core.nth.call(null, vec__5744, 0, null);
+    var v = cljs.core.nth.call(null, vec__5744, 1, null);
+    return cljs.core.assoc.call(null, m__$1, v, k)
+  }, cljs.core.ObjMap.EMPTY, m)
+};
+clojure.set.join = function() {
+  var join = null;
+  var join__2 = function(xrel, yrel) {
+    if(function() {
+      var and__3941__auto__ = cljs.core.seq.call(null, xrel);
+      if(and__3941__auto__) {
+        return cljs.core.seq.call(null, yrel)
+      }else {
+        return and__3941__auto__
+      }
+    }()) {
+      var ks = clojure.set.intersection.call(null, cljs.core.set.call(null, cljs.core.keys.call(null, cljs.core.first.call(null, xrel))), cljs.core.set.call(null, cljs.core.keys.call(null, cljs.core.first.call(null, yrel))));
+      var vec__5748 = cljs.core.count.call(null, xrel) <= cljs.core.count.call(null, yrel) ? cljs.core.PersistentVector.fromArray([xrel, yrel], true) : cljs.core.PersistentVector.fromArray([yrel, xrel], true);
+      var r = cljs.core.nth.call(null, vec__5748, 0, null);
+      var s = cljs.core.nth.call(null, vec__5748, 1, null);
+      var idx = clojure.set.index.call(null, r, ks);
+      return cljs.core.reduce.call(null, function(ret, x) {
+        var found = idx.call(null, cljs.core.select_keys.call(null, x, ks));
+        if(cljs.core.truth_(found)) {
+          return cljs.core.reduce.call(null, function(p1__5737_SHARP_, p2__5738_SHARP_) {
+            return cljs.core.conj.call(null, p1__5737_SHARP_, cljs.core.merge.call(null, p2__5738_SHARP_, x))
+          }, ret, found)
+        }else {
+          return ret
+        }
+      }, cljs.core.PersistentHashSet.EMPTY, s)
+    }else {
+      return cljs.core.PersistentHashSet.EMPTY
+    }
+  };
+  var join__3 = function(xrel, yrel, km) {
+    var vec__5749 = cljs.core.count.call(null, xrel) <= cljs.core.count.call(null, yrel) ? cljs.core.PersistentVector.fromArray([xrel, yrel, clojure.set.map_invert.call(null, km)], true) : cljs.core.PersistentVector.fromArray([yrel, xrel, km], true);
+    var r = cljs.core.nth.call(null, vec__5749, 0, null);
+    var s = cljs.core.nth.call(null, vec__5749, 1, null);
+    var k = cljs.core.nth.call(null, vec__5749, 2, null);
+    var idx = clojure.set.index.call(null, r, cljs.core.vals.call(null, k));
+    return cljs.core.reduce.call(null, function(ret, x) {
+      var found = idx.call(null, clojure.set.rename_keys.call(null, cljs.core.select_keys.call(null, x, cljs.core.keys.call(null, k)), k));
+      if(cljs.core.truth_(found)) {
+        return cljs.core.reduce.call(null, function(p1__5739_SHARP_, p2__5740_SHARP_) {
+          return cljs.core.conj.call(null, p1__5739_SHARP_, cljs.core.merge.call(null, p2__5740_SHARP_, x))
+        }, ret, found)
+      }else {
+        return ret
+      }
+    }, cljs.core.PersistentHashSet.EMPTY, s)
+  };
+  join = function(xrel, yrel, km) {
+    switch(arguments.length) {
+      case 2:
+        return join__2.call(this, xrel, yrel);
+      case 3:
+        return join__3.call(this, xrel, yrel, km)
+    }
+    throw new Error("Invalid arity: " + arguments.length);
+  };
+  join.cljs$core$IFn$_invoke$arity$2 = join__2;
+  join.cljs$core$IFn$_invoke$arity$3 = join__3;
+  return join
+}();
+clojure.set.subset_QMARK_ = function subset_QMARK_(set1, set2) {
+  var and__3941__auto__ = cljs.core.count.call(null, set1) <= cljs.core.count.call(null, set2);
+  if(and__3941__auto__) {
+    return cljs.core.every_QMARK_.call(null, function(p1__5745_SHARP_) {
+      return cljs.core.contains_QMARK_.call(null, set2, p1__5745_SHARP_)
+    }, set1)
+  }else {
+    return and__3941__auto__
+  }
+};
+clojure.set.superset_QMARK_ = function superset_QMARK_(set1, set2) {
+  var and__3941__auto__ = cljs.core.count.call(null, set1) >= cljs.core.count.call(null, set2);
+  if(and__3941__auto__) {
+    return cljs.core.every_QMARK_.call(null, function(p1__5750_SHARP_) {
+      return cljs.core.contains_QMARK_.call(null, set1, p1__5750_SHARP_)
+    }, set2)
+  }else {
+    return and__3941__auto__
+  }
+};
+goog.provide("webfui.html");
+goog.require("cljs.core");
+goog.require("clojure.set");
+goog.require("clojure.set");
+goog.provide("webfui.html.parsed_tagname");
+webfui.html.parsed_tagname = function(tagname, id, classes) {
+  this.tagname = tagname;
+  this.id = id;
+  this.classes = classes
+};
+webfui.html.parsed_tagname.cljs$lang$type = true;
+webfui.html.parsed_tagname.cljs$lang$ctorStr = "webfui.html/parsed-tagname";
+webfui.html.parsed_tagname.cljs$lang$ctorPrWriter = function(this__2885__auto__, writer__2886__auto__, opts__2887__auto__) {
+  return cljs.core._write.call(null, writer__2886__auto__, "webfui.html/parsed-tagname")
+};
+goog.provide("webfui.html.parsed_html");
+webfui.html.parsed_html = function(tagname, attributes, children) {
+  this.tagname = tagname;
+  this.attributes = attributes;
+  this.children = children
+};
+webfui.html.parsed_html.cljs$lang$type = true;
+webfui.html.parsed_html.cljs$lang$ctorStr = "webfui.html/parsed-html";
+webfui.html.parsed_html.cljs$lang$ctorPrWriter = function(this__2885__auto__, writer__2886__auto__, opts__2887__auto__) {
+  return cljs.core._write.call(null, writer__2886__auto__, "webfui.html/parsed-html")
+};
+webfui.html.parse_tagname = function parse_tagname(tagname) {
+  var vec__5667 = cljs.core.re_matches.call(null, /^([^.^#]+)(#([^.]+))?(\..+)?/, tagname);
+  var _ = cljs.core.nth.call(null, vec__5667, 0, null);
+  var name = cljs.core.nth.call(null, vec__5667, 1, null);
+  var ___$1 = cljs.core.nth.call(null, vec__5667, 2, null);
+  var id = cljs.core.nth.call(null, vec__5667, 3, null);
+  var classes = cljs.core.nth.call(null, vec__5667, 4, null);
+  return new webfui.html.parsed_tagname(cljs.core.keyword.call(null, name), cljs.core.truth_(id) ? cljs.core.keyword.call(null, id) : null, cljs.core.truth_(classes) ? cljs.core.map.call(null, cljs.core.second, cljs.core.re_seq.call(null, /\.([^.]+)/, classes)) : null)
+};
+var cache_5668 = cljs.core.atom.call(null, cljs.core.ObjMap.EMPTY);
+webfui.html.parse_tagname_memoized = function parse_tagname_memoized(tagname) {
+  var or__3943__auto__ = cljs.core.deref.call(null, cache_5668).call(null, tagname);
+  if(cljs.core.truth_(or__3943__auto__)) {
+    return or__3943__auto__
+  }else {
+    var val = webfui.html.parse_tagname.call(null, tagname);
+    cljs.core.swap_BANG_.call(null, cache_5668, cljs.core.assoc, tagname, val);
+    return val
+  }
+};
+webfui.html.parse_element = function parse_element(element) {
+  var vec__5672 = element;
+  var tagname = cljs.core.nth.call(null, vec__5672, 0, null);
+  var more = cljs.core.nthnext.call(null, vec__5672, 1);
+  var parsed = webfui.html.parse_tagname_memoized.call(null, tagname);
+  var classes = parsed.classes;
+  var id = parsed.id;
+  var tagname__$1 = parsed.tagname;
+  var attributes = cljs.core.ObjMap.EMPTY;
+  var attributes__$1 = cljs.core.truth_(classes) ? cljs.core.assoc.call(null, attributes, "\ufdd0:class", cljs.core.apply.call(null, cljs.core.str, cljs.core.interpose.call(null, " ", classes))) : attributes;
+  var attributes__$2 = cljs.core.truth_(id) ? cljs.core.assoc.call(null, attributes__$1, "\ufdd0:id", id) : attributes__$1;
+  var vec__5673 = more;
+  var a = cljs.core.nth.call(null, vec__5673, 0, null);
+  var b = cljs.core.nthnext.call(null, vec__5673, 1);
+  var vec__5674 = cljs.core.map_QMARK_.call(null, a) ? cljs.core.PersistentVector.fromArray([cljs.core.merge.call(null, attributes__$2, a), b], true) : cljs.core.PersistentVector.fromArray([attributes__$2, more], true);
+  var attributes__$3 = cljs.core.nth.call(null, vec__5674, 0, null);
+  var children = cljs.core.nth.call(null, vec__5674, 1, null);
+  return new webfui.html.parsed_html(tagname__$1, attributes__$3, webfui.html.parse_html.call(null, children))
+};
+webfui.html.merge_strings = function merge_strings(lst) {
+  var temp__4090__auto__ = lst;
+  if(cljs.core.truth_(temp__4090__auto__)) {
+    var vec__5677 = temp__4090__auto__;
+    var x = cljs.core.nth.call(null, vec__5677, 0, null);
+    var more = cljs.core.nthnext.call(null, vec__5677, 1);
+    var temp__4090__auto____$1 = more;
+    if(cljs.core.truth_(temp__4090__auto____$1)) {
+      var vec__5678 = temp__4090__auto____$1;
+      var y = cljs.core.nth.call(null, vec__5678, 0, null);
+      var more__$1 = cljs.core.nthnext.call(null, vec__5678, 1);
+      if(function() {
+        var and__3941__auto__ = cljs.core.string_QMARK_.call(null, x);
+        if(and__3941__auto__) {
+          return cljs.core.string_QMARK_.call(null, y)
+        }else {
+          return and__3941__auto__
+        }
+      }()) {
+        return merge_strings.call(null, cljs.core.cons.call(null, [cljs.core.str(x), cljs.core.str(y)].join(""), more__$1))
+      }else {
+        return cljs.core.cons.call(null, x, merge_strings.call(null, cljs.core.cons.call(null, y, more__$1)))
+      }
+    }else {
+      return lst
+    }
+  }else {
+    return lst
+  }
+};
+webfui.html.parse_html = function parse_html(html) {
+  return cljs.core.mapcat.call(null, function(x) {
+    if(cljs.core.vector_QMARK_.call(null, x)) {
+      return cljs.core.PersistentVector.fromArray([webfui.html.parse_element.call(null, x)], true)
+    }else {
+      if(function() {
+        var and__3941__auto__ = cljs.core.coll_QMARK_.call(null, x);
+        if(and__3941__auto__) {
+          return!cljs.core.string_QMARK_.call(null, x)
+        }else {
+          return and__3941__auto__
+        }
+      }()) {
+        return parse_html.call(null, x)
+      }else {
+        if("\ufdd0:else") {
+          return cljs.core.PersistentVector.fromArray([x], true)
+        }else {
+          return null
+        }
+      }
+    }
+  }, webfui.html.merge_strings.call(null, html))
+};
+webfui.html.tag = function tag(tagname, atts, s) {
+  if(cljs.core.truth_(cljs.core.PersistentHashSet.fromArray(["\ufdd0:br", null], true).call(null, tagname))) {
+    return[cljs.core.str("<"), cljs.core.str(cljs.core.name.call(null, tagname)), cljs.core.str(atts), cljs.core.str(">")].join("")
+  }else {
+    return[cljs.core.str("<"), cljs.core.str(cljs.core.name.call(null, tagname)), cljs.core.str(atts), cljs.core.str(">"), cljs.core.str(cljs.core.apply.call(null, cljs.core.str, s)), cljs.core.str("</"), cljs.core.str(cljs.core.name.call(null, tagname)), cljs.core.str(">")].join("")
+  }
+};
+webfui.html.pixels = function pixels(k) {
+  return[cljs.core.str(k.toFixed(3)), cljs.core.str("px")].join("")
+};
+webfui.html.render_css = function render_css(css) {
+  return cljs.core.apply.call(null, cljs.core.str, cljs.core.interpose.call(null, ";", function() {
+    var iter__3042__auto__ = function iter__5687(s__5688) {
+      return new cljs.core.LazySeq(null, false, function() {
+        var s__5688__$1 = s__5688;
+        while(true) {
+          var temp__4092__auto__ = cljs.core.seq.call(null, s__5688__$1);
+          if(temp__4092__auto__) {
+            var s__5688__$2 = temp__4092__auto__;
+            if(cljs.core.chunked_seq_QMARK_.call(null, s__5688__$2)) {
+              var c__3040__auto__ = cljs.core.chunk_first.call(null, s__5688__$2);
+              var size__3041__auto__ = cljs.core.count.call(null, c__3040__auto__);
+              var b__5690 = cljs.core.chunk_buffer.call(null, size__3041__auto__);
+              if(function() {
+                var i__5689 = 0;
+                while(true) {
+                  if(i__5689 < size__3041__auto__) {
+                    var vec__5693 = cljs.core._nth.call(null, c__3040__auto__, i__5689);
+                    var k = cljs.core.nth.call(null, vec__5693, 0, null);
+                    var v = cljs.core.nth.call(null, vec__5693, 1, null);
+                    cljs.core.chunk_append.call(null, b__5690, [cljs.core.str(cljs.core.name.call(null, k)), cljs.core.str(":"), cljs.core.str(cljs.core.keyword_QMARK_.call(null, v) ? cljs.core.name.call(null, v) : cljs.core.truth_(function() {
+                      var and__3941__auto__ = typeof v === "number";
+                      if(and__3941__auto__) {
+                        return cljs.core.PersistentHashSet.fromArray(["\ufdd0:bottom", null, "\ufdd0:width", null, "\ufdd0:top", null, "\ufdd0:right", null, "\ufdd0:left", null, "\ufdd0:line-height", null, "\ufdd0:height", null], true).call(null, k)
+                      }else {
+                        return and__3941__auto__
+                      }
+                    }()) ? webfui.html.pixels.call(null, v) : "\ufdd0:else" ? v : null)].join(""));
+                    var G__5695 = i__5689 + 1;
+                    i__5689 = G__5695;
+                    continue
+                  }else {
+                    return true
+                  }
+                  break
+                }
+              }()) {
+                return cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, b__5690), iter__5687.call(null, cljs.core.chunk_rest.call(null, s__5688__$2)))
+              }else {
+                return cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, b__5690), null)
+              }
+            }else {
+              var vec__5694 = cljs.core.first.call(null, s__5688__$2);
+              var k = cljs.core.nth.call(null, vec__5694, 0, null);
+              var v = cljs.core.nth.call(null, vec__5694, 1, null);
+              return cljs.core.cons.call(null, [cljs.core.str(cljs.core.name.call(null, k)), cljs.core.str(":"), cljs.core.str(cljs.core.keyword_QMARK_.call(null, v) ? cljs.core.name.call(null, v) : cljs.core.truth_(function() {
+                var and__3941__auto__ = typeof v === "number";
+                if(and__3941__auto__) {
+                  return cljs.core.PersistentHashSet.fromArray(["\ufdd0:bottom", null, "\ufdd0:width", null, "\ufdd0:top", null, "\ufdd0:right", null, "\ufdd0:left", null, "\ufdd0:line-height", null, "\ufdd0:height", null], true).call(null, k)
+                }else {
+                  return and__3941__auto__
+                }
+              }()) ? webfui.html.pixels.call(null, v) : "\ufdd0:else" ? v : null)].join(""), iter__5687.call(null, cljs.core.rest.call(null, s__5688__$2)))
+            }
+          }else {
+            return null
+          }
+          break
+        }
+      }, null)
+    };
+    return iter__3042__auto__.call(null, css)
+  }()))
+};
+webfui.html.render_attribute_value = function render_attribute_value(key, value) {
+  if(cljs.core.keyword_QMARK_.call(null, value)) {
+    return cljs.core.name.call(null, value)
+  }else {
+    if(cljs.core._EQ_.call(null, key, "\ufdd0:data")) {
+      return cljs.core.print_str.call(null, value)
+    }else {
+      if(cljs.core._EQ_.call(null, key, "\ufdd0:style")) {
+        return webfui.html.render_css.call(null, value)
+      }else {
+        if("\ufdd0:else") {
+          return value
+        }else {
+          return null
+        }
+      }
+    }
+  }
+};
+webfui.html.render_attributes = function render_attributes(atts) {
+  return cljs.core.apply.call(null, cljs.core.str, function() {
+    var iter__3042__auto__ = function iter__5704(s__5705) {
+      return new cljs.core.LazySeq(null, false, function() {
+        var s__5705__$1 = s__5705;
+        while(true) {
+          var temp__4092__auto__ = cljs.core.seq.call(null, s__5705__$1);
+          if(temp__4092__auto__) {
+            var s__5705__$2 = temp__4092__auto__;
+            if(cljs.core.chunked_seq_QMARK_.call(null, s__5705__$2)) {
+              var c__3040__auto__ = cljs.core.chunk_first.call(null, s__5705__$2);
+              var size__3041__auto__ = cljs.core.count.call(null, c__3040__auto__);
+              var b__5707 = cljs.core.chunk_buffer.call(null, size__3041__auto__);
+              if(function() {
+                var i__5706 = 0;
+                while(true) {
+                  if(i__5706 < size__3041__auto__) {
+                    var vec__5710 = cljs.core._nth.call(null, c__3040__auto__, i__5706);
+                    var key = cljs.core.nth.call(null, vec__5710, 0, null);
+                    var value = cljs.core.nth.call(null, vec__5710, 1, null);
+                    cljs.core.chunk_append.call(null, b__5707, [cljs.core.str(" "), cljs.core.str(cljs.core.name.call(null, key)), cljs.core.str('="'), cljs.core.str(webfui.html.render_attribute_value.call(null, key, value)), cljs.core.str('"')].join(""));
+                    var G__5712 = i__5706 + 1;
+                    i__5706 = G__5712;
+                    continue
+                  }else {
+                    return true
+                  }
+                  break
+                }
+              }()) {
+                return cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, b__5707), iter__5704.call(null, cljs.core.chunk_rest.call(null, s__5705__$2)))
+              }else {
+                return cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, b__5707), null)
+              }
+            }else {
+              var vec__5711 = cljs.core.first.call(null, s__5705__$2);
+              var key = cljs.core.nth.call(null, vec__5711, 0, null);
+              var value = cljs.core.nth.call(null, vec__5711, 1, null);
+              return cljs.core.cons.call(null, [cljs.core.str(" "), cljs.core.str(cljs.core.name.call(null, key)), cljs.core.str('="'), cljs.core.str(webfui.html.render_attribute_value.call(null, key, value)), cljs.core.str('"')].join(""), iter__5704.call(null, cljs.core.rest.call(null, s__5705__$2)))
+            }
+          }else {
+            return null
+          }
+          break
+        }
+      }, null)
+    };
+    return iter__3042__auto__.call(null, atts)
+  }())
+};
+webfui.html.html = function html(content) {
+  if(content instanceof webfui.html.parsed_html) {
+    var tagname = content.tagname;
+    var attributes = content.attributes;
+    var children = content.children;
+    if(cljs.core.truth_(tagname)) {
+      return webfui.html.tag.call(null, tagname, cljs.core.truth_(attributes) ? webfui.html.render_attributes.call(null, attributes) : null, cljs.core.map.call(null, html, children))
+    }else {
+      return""
+    }
+  }else {
+    if("\ufdd0:else") {
+      return[cljs.core.str(content)].join("")
+    }else {
+      return null
+    }
+  }
+};
+webfui.html.html_delta = function html_delta(old_html, new_html, path) {
+  if(cljs.core._EQ_.call(null, cljs.core.count.call(null, old_html), cljs.core.count.call(null, new_html))) {
+    var pairs = cljs.core.map.call(null, cljs.core.vector, old_html, new_html);
+    var fixable = cljs.core.every_QMARK_.call(null, function(pairs) {
+      return function(p__5717) {
+        var vec__5718 = p__5717;
+        var old_child = cljs.core.nth.call(null, vec__5718, 0, null);
+        var new_child = cljs.core.nth.call(null, vec__5718, 1, null);
+        if(function() {
+          var and__3941__auto__ = old_child instanceof webfui.html.parsed_html;
+          if(and__3941__auto__) {
+            return new_child instanceof webfui.html.parsed_html
+          }else {
+            return and__3941__auto__
+          }
+        }()) {
+          return cljs.core._EQ_.call(null, old_child.tagname, new_child.tagname)
+        }else {
+          return cljs.core._EQ_.call(null, old_child, new_child)
+        }
+      }
+    }(pairs), pairs);
+    if(fixable) {
+      return cljs.core.apply.call(null, cljs.core.concat, cljs.core.map_indexed.call(null, function(i, p__5719) {
+        var vec__5720 = p__5719;
+        var old_element = cljs.core.nth.call(null, vec__5720, 0, null);
+        var new_element = cljs.core.nth.call(null, vec__5720, 1, null);
+        if(old_element instanceof webfui.html.parsed_html) {
+          var old_tagname = old_element.tagname;
+          var old_attributes = old_element.attributes;
+          var old_children = old_element.children;
+          var new_tagname = new_element.tagname;
+          var new_attributes = new_element.attributes;
+          var new_children = new_element.children;
+          var path__$1 = cljs.core.conj.call(null, path, i);
+          var att_delta = cljs.core.not_EQ_.call(null, old_attributes, new_attributes) ? cljs.core.mapcat.call(null, function(old_tagname, old_attributes, old_children, new_tagname, new_attributes, new_children, path__$1) {
+            return function(key) {
+              var old_val = old_attributes.call(null, key);
+              var new_val = new_attributes.call(null, key);
+              if(cljs.core.not.call(null, new_val)) {
+                return cljs.core.PersistentVector.fromArray([cljs.core.PersistentVector.fromArray(["\ufdd0:rem-att", path__$1, key], true)], true)
+              }else {
+                if(cljs.core.not_EQ_.call(null, old_val, new_val)) {
+                  return cljs.core.PersistentVector.fromArray([cljs.core.PersistentVector.fromArray(["\ufdd0:att", path__$1, key, new_val], true)], true)
+                }else {
+                  if("\ufdd0:else") {
+                    return cljs.core.PersistentVector.EMPTY
+                  }else {
+                    return null
+                  }
+                }
+              }
+            }
+          }(old_tagname, old_attributes, old_children, new_tagname, new_attributes, new_children, path__$1), clojure.set.union.call(null, cljs.core.set.call(null, cljs.core.keys.call(null, old_attributes)), cljs.core.set.call(null, cljs.core.keys.call(null, new_attributes)))) : null;
+          var child_delta = html_delta.call(null, old_children, new_children, path__$1);
+          return cljs.core.concat.call(null, att_delta, child_delta)
+        }else {
+          return null
+        }
+      }, pairs))
+    }else {
+      return cljs.core.PersistentVector.fromArray([cljs.core.PersistentVector.fromArray(["\ufdd0:html", path, new_html], true)], true)
+    }
+  }else {
+    return cljs.core.PersistentVector.fromArray([cljs.core.PersistentVector.fromArray(["\ufdd0:html", path, new_html], true)], true)
+  }
+};
+webfui.html.unparse_html = function unparse_html(html) {
+  if(function() {
+    var or__3943__auto__ = cljs.core.string_QMARK_.call(null, html);
+    if(or__3943__auto__) {
+      return or__3943__auto__
+    }else {
+      return typeof html === "number"
+    }
+  }()) {
+    return html
+  }else {
+    var tagname = html.tagname;
+    var attributes = html.attributes;
+    var children = html.children;
+    return cljs.core.vec.call(null, cljs.core.concat.call(null, cljs.core.PersistentVector.fromArray([tagname, attributes], true), cljs.core.map.call(null, unparse_html, children)))
+  }
+};
+goog.provide("webfui.core");
+goog.require("cljs.core");
+goog.require("webfui.plugin.core");
+goog.require("cljs.reader");
+goog.require("webfui.html");
+goog.require("cljs.reader");
+goog.require("webfui.plugin.core");
+goog.require("webfui.html");
+webfui.core.body = function body() {
+  return document.body
+};
+webfui.core.select_path_dom = function select_path_dom(node, path) {
+  while(true) {
+    var temp__4090__auto__ = cljs.core.seq.call(null, path);
+    if(temp__4090__auto__) {
+      var vec__5752 = temp__4090__auto__;
+      var cur = cljs.core.nth.call(null, vec__5752, 0, null);
+      var more = cljs.core.nthnext.call(null, vec__5752, 1);
+      var G__5753 = node.childNodes.item(cur);
+      var G__5754 = more;
+      node = G__5753;
+      path = G__5754;
+      continue
+    }else {
+      return node
+    }
+    break
+  }
+};
+webfui.core.dom_ready_QMARK_ = function dom_ready_QMARK_() {
+  return cljs.core._EQ_.call(null, document.readyState, "complete")
+};
+webfui.core.dom_ready = function dom_ready(fun) {
+  return window.onload = fun
+};
+webfui.core.parsed_html_watcher = function parsed_html_watcher(key, a, old, new$) {
+  var delta = webfui.html.html_delta.call(null, old.children, new$.children, cljs.core.PersistentVector.EMPTY);
+  var seq__5767_5779 = cljs.core.seq.call(null, delta);
+  var chunk__5768_5780 = null;
+  var count__5769_5781 = 0;
+  var i__5770_5782 = 0;
+  while(true) {
+    if(i__5770_5782 < count__5769_5781) {
+      var vec__5771_5783 = cljs.core._nth.call(null, chunk__5768_5780, i__5770_5782);
+      var typ_5784 = cljs.core.nth.call(null, vec__5771_5783, 0, null);
+      var path_5785 = cljs.core.nth.call(null, vec__5771_5783, 1, null);
+      var a_5786__$1 = cljs.core.nth.call(null, vec__5771_5783, 2, null);
+      var b_5787 = cljs.core.nth.call(null, vec__5771_5783, 3, null);
+      var node_5788 = webfui.core.select_path_dom.call(null, webfui.core.body.call(null), path_5785);
+      var G__5772_5789 = typ_5784;
+      if(cljs.core._EQ_.call(null, "\ufdd0:html", G__5772_5789)) {
+        node_5788.innerHTML = cljs.core.apply.call(null, cljs.core.str, cljs.core.map.call(null, webfui.html.html, a_5786__$1))
+      }else {
+        if(cljs.core._EQ_.call(null, "\ufdd0:rem-att", G__5772_5789)) {
+          node_5788.removeAttribute(cljs.core.name.call(null, a_5786__$1))
+        }else {
+          if(cljs.core._EQ_.call(null, "\ufdd0:att", G__5772_5789)) {
+            if(cljs.core._EQ_.call(null, a_5786__$1, "\ufdd0:value")) {
+              node_5788.value = [cljs.core.str(b_5787)].join("")
+            }else {
+              node_5788.setAttribute(cljs.core.name.call(null, a_5786__$1), webfui.html.render_attribute_value.call(null, a_5786__$1, b_5787))
+            }
+          }else {
+            if("\ufdd0:else") {
+              throw new Error([cljs.core.str("No matching clause: "), cljs.core.str(typ_5784)].join(""));
+            }else {
+            }
+          }
+        }
+      }
+      var G__5790 = seq__5767_5779;
+      var G__5791 = chunk__5768_5780;
+      var G__5792 = count__5769_5781;
+      var G__5793 = i__5770_5782 + 1;
+      seq__5767_5779 = G__5790;
+      chunk__5768_5780 = G__5791;
+      count__5769_5781 = G__5792;
+      i__5770_5782 = G__5793;
+      continue
+    }else {
+      var temp__4092__auto___5794 = cljs.core.seq.call(null, seq__5767_5779);
+      if(temp__4092__auto___5794) {
+        var seq__5767_5795__$1 = temp__4092__auto___5794;
+        if(cljs.core.chunked_seq_QMARK_.call(null, seq__5767_5795__$1)) {
+          var c__3073__auto___5796 = cljs.core.chunk_first.call(null, seq__5767_5795__$1);
+          var G__5797 = cljs.core.chunk_rest.call(null, seq__5767_5795__$1);
+          var G__5798 = c__3073__auto___5796;
+          var G__5799 = cljs.core.count.call(null, c__3073__auto___5796);
+          var G__5800 = 0;
+          seq__5767_5779 = G__5797;
+          chunk__5768_5780 = G__5798;
+          count__5769_5781 = G__5799;
+          i__5770_5782 = G__5800;
+          continue
+        }else {
+          var vec__5773_5801 = cljs.core.first.call(null, seq__5767_5795__$1);
+          var typ_5802 = cljs.core.nth.call(null, vec__5773_5801, 0, null);
+          var path_5803 = cljs.core.nth.call(null, vec__5773_5801, 1, null);
+          var a_5804__$1 = cljs.core.nth.call(null, vec__5773_5801, 2, null);
+          var b_5805 = cljs.core.nth.call(null, vec__5773_5801, 3, null);
+          var node_5806 = webfui.core.select_path_dom.call(null, webfui.core.body.call(null), path_5803);
+          var G__5774_5807 = typ_5802;
+          if(cljs.core._EQ_.call(null, "\ufdd0:html", G__5774_5807)) {
+            node_5806.innerHTML = cljs.core.apply.call(null, cljs.core.str, cljs.core.map.call(null, webfui.html.html, a_5804__$1))
+          }else {
+            if(cljs.core._EQ_.call(null, "\ufdd0:rem-att", G__5774_5807)) {
+              node_5806.removeAttribute(cljs.core.name.call(null, a_5804__$1))
+            }else {
+              if(cljs.core._EQ_.call(null, "\ufdd0:att", G__5774_5807)) {
+                if(cljs.core._EQ_.call(null, a_5804__$1, "\ufdd0:value")) {
+                  node_5806.value = [cljs.core.str(b_5805)].join("")
+                }else {
+                  node_5806.setAttribute(cljs.core.name.call(null, a_5804__$1), webfui.html.render_attribute_value.call(null, a_5804__$1, b_5805))
+                }
+              }else {
+                if("\ufdd0:else") {
+                  throw new Error([cljs.core.str("No matching clause: "), cljs.core.str(typ_5802)].join(""));
+                }else {
+                }
+              }
+            }
+          }
+          var G__5808 = cljs.core.next.call(null, seq__5767_5795__$1);
+          var G__5809 = null;
+          var G__5810 = 0;
+          var G__5811 = 0;
+          seq__5767_5779 = G__5808;
+          chunk__5768_5780 = G__5809;
+          count__5769_5781 = G__5810;
+          i__5770_5782 = G__5811;
+          continue
+        }
+      }else {
+      }
+    }
+    break
+  }
+  var seq__5775 = cljs.core.seq.call(null, cljs.core.deref.call(null, webfui.plugin.core.active_plugins));
+  var chunk__5776 = null;
+  var count__5777 = 0;
+  var i__5778 = 0;
+  while(true) {
+    if(i__5778 < count__5777) {
+      var plugin = cljs.core._nth.call(null, chunk__5776, i__5778);
+      webfui.plugin.core.fix_dom.call(null, plugin);
+      var G__5812 = seq__5775;
+      var G__5813 = chunk__5776;
+      var G__5814 = count__5777;
+      var G__5815 = i__5778 + 1;
+      seq__5775 = G__5812;
+      chunk__5776 = G__5813;
+      count__5777 = G__5814;
+      i__5778 = G__5815;
+      continue
+    }else {
+      var temp__4092__auto__ = cljs.core.seq.call(null, seq__5775);
+      if(temp__4092__auto__) {
+        var seq__5775__$1 = temp__4092__auto__;
+        if(cljs.core.chunked_seq_QMARK_.call(null, seq__5775__$1)) {
+          var c__3073__auto__ = cljs.core.chunk_first.call(null, seq__5775__$1);
+          var G__5816 = cljs.core.chunk_rest.call(null, seq__5775__$1);
+          var G__5817 = c__3073__auto__;
+          var G__5818 = cljs.core.count.call(null, c__3073__auto__);
+          var G__5819 = 0;
+          seq__5775 = G__5816;
+          chunk__5776 = G__5817;
+          count__5777 = G__5818;
+          i__5778 = G__5819;
+          continue
+        }else {
+          var plugin = cljs.core.first.call(null, seq__5775__$1);
+          webfui.plugin.core.fix_dom.call(null, plugin);
+          var G__5820 = cljs.core.next.call(null, seq__5775__$1);
+          var G__5821 = null;
+          var G__5822 = 0;
+          var G__5823 = 0;
+          seq__5775 = G__5820;
+          chunk__5776 = G__5821;
+          count__5777 = G__5822;
+          i__5778 = G__5823;
+          continue
+        }
+      }else {
+        return null
+      }
+    }
+    break
+  }
+};
+webfui.core.parsed_html_atom = cljs.core.atom.call(null, new webfui.html.parsed_html("\ufdd0:body", cljs.core.ObjMap.EMPTY, null));
+webfui.core.update_parsed_html_atom = function update_parsed_html_atom(new$, old) {
+  return new webfui.html.parsed_html("\ufdd0:body", cljs.core.ObjMap.EMPTY, function() {
+    var or__3943__auto__ = cljs.core.seq_QMARK_.call(null, new$);
+    if(or__3943__auto__) {
+      return or__3943__auto__
+    }else {
+      return cljs.core.list_QMARK_.call(null, new$)
+    }
+  }() ? webfui.html.parse_html.call(null, new$) : webfui.html.parse_html.call(null, cljs.core.list.call(null, new$)))
+};
+webfui.core.html_watcher = function html_watcher(key, a, old, new$) {
+  return cljs.core.swap_BANG_.call(null, webfui.core.parsed_html_atom, cljs.core.partial.call(null, webfui.core.update_parsed_html_atom, new$))
+};
+webfui.core.dom_watchers = cljs.core.atom.call(null, cljs.core.ObjMap.EMPTY);
+webfui.core.core_add_dom_watch = function core_add_dom_watch(id, fun) {
+  return cljs.core.swap_BANG_.call(null, webfui.core.dom_watchers, cljs.core.assoc, id, fun)
+};
+webfui.core.init_dom = function init_dom(html) {
+  var b = webfui.core.body.call(null);
+  var seq__5828_5832 = cljs.core.seq.call(null, cljs.core.deref.call(null, webfui.plugin.core.active_plugins));
+  var chunk__5829_5833 = null;
+  var count__5830_5834 = 0;
+  var i__5831_5835 = 0;
+  while(true) {
+    if(i__5831_5835 < count__5830_5834) {
+      var plugin_5836 = cljs.core._nth.call(null, chunk__5829_5833, i__5831_5835);
+      webfui.plugin.core.declare_events.call(null, plugin_5836, webfui.core.body.call(null), webfui.core.dom_watchers, webfui.core.parsed_html_atom);
+      var G__5837 = seq__5828_5832;
+      var G__5838 = chunk__5829_5833;
+      var G__5839 = count__5830_5834;
+      var G__5840 = i__5831_5835 + 1;
+      seq__5828_5832 = G__5837;
+      chunk__5829_5833 = G__5838;
+      count__5830_5834 = G__5839;
+      i__5831_5835 = G__5840;
+      continue
+    }else {
+      var temp__4092__auto___5841 = cljs.core.seq.call(null, seq__5828_5832);
+      if(temp__4092__auto___5841) {
+        var seq__5828_5842__$1 = temp__4092__auto___5841;
+        if(cljs.core.chunked_seq_QMARK_.call(null, seq__5828_5842__$1)) {
+          var c__3073__auto___5843 = cljs.core.chunk_first.call(null, seq__5828_5842__$1);
+          var G__5844 = cljs.core.chunk_rest.call(null, seq__5828_5842__$1);
+          var G__5845 = c__3073__auto___5843;
+          var G__5846 = cljs.core.count.call(null, c__3073__auto___5843);
+          var G__5847 = 0;
+          seq__5828_5832 = G__5844;
+          chunk__5829_5833 = G__5845;
+          count__5830_5834 = G__5846;
+          i__5831_5835 = G__5847;
+          continue
+        }else {
+          var plugin_5848 = cljs.core.first.call(null, seq__5828_5842__$1);
+          webfui.plugin.core.declare_events.call(null, plugin_5848, webfui.core.body.call(null), webfui.core.dom_watchers, webfui.core.parsed_html_atom);
+          var G__5849 = cljs.core.next.call(null, seq__5828_5842__$1);
+          var G__5850 = null;
+          var G__5851 = 0;
+          var G__5852 = 0;
+          seq__5828_5832 = G__5849;
+          chunk__5829_5833 = G__5850;
+          count__5830_5834 = G__5851;
+          i__5831_5835 = G__5852;
+          continue
+        }
+      }else {
+      }
+    }
+    break
+  }
+  cljs.core.add_watch.call(null, html, "\ufdd0:dom-watcher", webfui.core.html_watcher);
+  cljs.core.add_watch.call(null, webfui.core.parsed_html_atom, "\ufdd0:parsed-html-watcher", webfui.core.parsed_html_watcher);
+  return cljs.core.swap_BANG_.call(null, html, cljs.core.identity)
+};
+webfui.core.core_defdom = function core_defdom(clj_dom) {
+  if(cljs.core.truth_(webfui.core.dom_ready_QMARK_.call(null))) {
+    return webfui.core.init_dom.call(null, clj_dom)
+  }else {
+    return webfui.core.dom_ready.call(null, cljs.core.partial.call(null, webfui.core.init_dom, clj_dom))
+  }
+};
+goog.provide("webfui.dom_manipulation");
+goog.require("cljs.core");
+goog.require("webfui.html");
+goog.require("webfui.html");
+webfui.dom_manipulation.path_dom = function path_dom(node) {
+  return cljs.core.drop.call(null, 3, cljs.core.reverse.call(null, function f(node__$1) {
+    return new cljs.core.LazySeq(null, false, function() {
+      if(cljs.core.truth_(node__$1)) {
+        return cljs.core.cons.call(null, cljs.core.count.call(null, cljs.core.take_while.call(null, cljs.core.identity, cljs.core.iterate.call(null, function(p1__5661_SHARP_) {
+          return p1__5661_SHARP_.previousSibling
+        }, node__$1))) - 1, f.call(null, node__$1.parentNode))
+      }else {
+        return null
+      }
+    }, null)
+  }.call(null, node)))
+};
+webfui.dom_manipulation.select_path_html = function select_path_html(html, path) {
+  while(true) {
+    var temp__4090__auto__ = cljs.core.seq.call(null, path);
+    if(temp__4090__auto__) {
+      var vec__5663 = temp__4090__auto__;
+      var cur = cljs.core.nth.call(null, vec__5663, 0, null);
+      var more = cljs.core.nthnext.call(null, vec__5663, 1);
+      var G__5664 = cljs.core.nth.call(null, html.children, cur);
+      var G__5665 = more;
+      html = G__5664;
+      path = G__5665;
+      continue
+    }else {
+      return html
+    }
+    break
+  }
+};
+webfui.dom_manipulation.resolve_target = function resolve_target(parsed_html, target) {
+  var path = webfui.dom_manipulation.path_dom.call(null, target);
+  var parsed_element = webfui.dom_manipulation.select_path_html.call(null, parsed_html, path);
+  return webfui.html.unparse_html.call(null, parsed_element)
+};
+goog.provide("webfui.plugin.form_values");
+goog.require("cljs.core");
+goog.require("webfui.plugin.core");
+goog.require("webfui.dom_manipulation");
+goog.require("webfui.dom_manipulation");
+goog.require("webfui.plugin.core");
+webfui.plugin.form_values.input = function input(dom_watchers, parsed_html, event) {
+  var target = event.target;
+  var vec__5660 = webfui.dom_manipulation.resolve_target.call(null, cljs.core.deref.call(null, parsed_html), target);
+  var tagname = cljs.core.nth.call(null, vec__5660, 0, null);
+  var attributes = cljs.core.nth.call(null, vec__5660, 1, null);
+  var element = vec__5660;
+  var event__$1 = cljs.core.deref.call(null, dom_watchers).call(null, cljs.core.keyword.call(null, (new cljs.core.Keyword("\ufdd0:watch")).call(null, attributes)));
+  if(cljs.core.truth_(function() {
+    var and__3941__auto__ = event__$1;
+    if(cljs.core.truth_(and__3941__auto__)) {
+      return cljs.core.contains_QMARK_.call(null, cljs.core.PersistentHashSet.fromArray(["\ufdd0:textarea", null, "\ufdd0:input", null], true), tagname)
+    }else {
+      return and__3941__auto__
+    }
+  }())) {
+    var value = target.value;
+    var new_element = cljs.core.update_in.call(null, element, cljs.core.PersistentVector.fromArray([1, "\ufdd0:value"], true), function(value) {
+      return function(old) {
+        target.value = old;
+        return value
+      }
+    }(value));
+    return event__$1.call(null, element, new_element)
+  }else {
+    return null
+  }
+};
+goog.provide("webfui.plugin.form_values.form_values");
+webfui.plugin.form_values.form_values = function() {
+};
+webfui.plugin.form_values.form_values.cljs$lang$type = true;
+webfui.plugin.form_values.form_values.cljs$lang$ctorStr = "webfui.plugin.form-values/form-values";
+webfui.plugin.form_values.form_values.cljs$lang$ctorPrWriter = function(this__2882__auto__, writer__2883__auto__, opt__2884__auto__) {
+  return cljs.core._write.call(null, writer__2883__auto__, "webfui.plugin.form-values/form-values")
+};
+webfui.plugin.form_values.form_values.prototype.webfui$plugin$core$Plugin$ = true;
+webfui.plugin.form_values.form_values.prototype.webfui$plugin$core$Plugin$declare_events$arity$4 = function(this$, body, dom_watchers, parsed_html) {
+  var self__ = this;
+  return body.addEventListener("input", cljs.core.partial.call(null, webfui.plugin.form_values.input, dom_watchers, parsed_html))
+};
+webfui.plugin.form_values.form_values.prototype.webfui$plugin$core$Plugin$fix_dom$arity$1 = function(this$) {
+  var self__ = this;
+  return null
+};
+goog.provide("webfui.dom");
+goog.require("cljs.core");
+goog.require("webfui.plugin.core");
+goog.require("webfui.core");
+goog.require("webfui.plugin.form_values");
+goog.require("webfui.plugin.form_values");
+goog.require("webfui.plugin.core");
+goog.require("webfui.core");
+webfui.dom.add_dom_watch = webfui.core.core_add_dom_watch;
+webfui.dom.defdom = webfui.core.core_defdom;
+webfui.plugin.core.register_plugin.call(null, new webfui.plugin.form_values.form_values);
 goog.provide("webfui.plugin.mouse");
 goog.require("cljs.core");
 goog.require("webfui.plugin.core");
@@ -23959,337 +24245,130 @@ webfui.plugin.mouse.mouse.prototype.webfui$plugin$core$Plugin$fix_dom$arity$1 = 
   var self__ = this;
   return null
 };
-goog.provide("webfui.core");
+goog.provide("webfui.state_patches");
 goog.require("cljs.core");
-goog.require("webfui.plugin.core");
-goog.require("cljs.reader");
-goog.require("webfui.html");
-goog.require("cljs.reader");
-goog.require("webfui.plugin.core");
-goog.require("webfui.html");
-webfui.core.body = function body() {
-  return document.body
-};
-webfui.core.select_path_dom = function select_path_dom(node, path) {
-  while(true) {
-    var temp__4090__auto__ = cljs.core.seq.call(null, path);
-    if(temp__4090__auto__) {
-      var vec__5752 = temp__4090__auto__;
-      var cur = cljs.core.nth.call(null, vec__5752, 0, null);
-      var more = cljs.core.nthnext.call(null, vec__5752, 1);
-      var G__5753 = node.childNodes.item(cur);
-      var G__5754 = more;
-      node = G__5753;
-      path = G__5754;
-      continue
-    }else {
-      return node
-    }
-    break
-  }
-};
-webfui.core.dom_ready_QMARK_ = function dom_ready_QMARK_() {
-  return cljs.core._EQ_.call(null, document.readyState, "complete")
-};
-webfui.core.dom_ready = function dom_ready(fun) {
-  return window.onload = fun
-};
-webfui.core.parsed_html_watcher = function parsed_html_watcher(key, a, old, new$) {
-  var delta = webfui.html.html_delta.call(null, old.children, new$.children, cljs.core.PersistentVector.EMPTY);
-  var seq__5767_5779 = cljs.core.seq.call(null, delta);
-  var chunk__5768_5780 = null;
-  var count__5769_5781 = 0;
-  var i__5770_5782 = 0;
-  while(true) {
-    if(i__5770_5782 < count__5769_5781) {
-      var vec__5771_5783 = cljs.core._nth.call(null, chunk__5768_5780, i__5770_5782);
-      var typ_5784 = cljs.core.nth.call(null, vec__5771_5783, 0, null);
-      var path_5785 = cljs.core.nth.call(null, vec__5771_5783, 1, null);
-      var a_5786__$1 = cljs.core.nth.call(null, vec__5771_5783, 2, null);
-      var b_5787 = cljs.core.nth.call(null, vec__5771_5783, 3, null);
-      var node_5788 = webfui.core.select_path_dom.call(null, webfui.core.body.call(null), path_5785);
-      var G__5772_5789 = typ_5784;
-      if(cljs.core._EQ_.call(null, "\ufdd0:html", G__5772_5789)) {
-        node_5788.innerHTML = cljs.core.apply.call(null, cljs.core.str, cljs.core.map.call(null, webfui.html.html, a_5786__$1))
-      }else {
-        if(cljs.core._EQ_.call(null, "\ufdd0:rem-att", G__5772_5789)) {
-          node_5788.removeAttribute(cljs.core.name.call(null, a_5786__$1))
-        }else {
-          if(cljs.core._EQ_.call(null, "\ufdd0:att", G__5772_5789)) {
-            if(cljs.core._EQ_.call(null, a_5786__$1, "\ufdd0:value")) {
-              node_5788.value = [cljs.core.str(b_5787)].join("")
-            }else {
-              node_5788.setAttribute(cljs.core.name.call(null, a_5786__$1), webfui.html.render_attribute_value.call(null, a_5786__$1, b_5787))
-            }
-          }else {
-            if("\ufdd0:else") {
-              throw new Error([cljs.core.str("No matching clause: "), cljs.core.str(typ_5784)].join(""));
-            }else {
-            }
-          }
-        }
-      }
-      var G__5790 = seq__5767_5779;
-      var G__5791 = chunk__5768_5780;
-      var G__5792 = count__5769_5781;
-      var G__5793 = i__5770_5782 + 1;
-      seq__5767_5779 = G__5790;
-      chunk__5768_5780 = G__5791;
-      count__5769_5781 = G__5792;
-      i__5770_5782 = G__5793;
-      continue
-    }else {
-      var temp__4092__auto___5794 = cljs.core.seq.call(null, seq__5767_5779);
-      if(temp__4092__auto___5794) {
-        var seq__5767_5795__$1 = temp__4092__auto___5794;
-        if(cljs.core.chunked_seq_QMARK_.call(null, seq__5767_5795__$1)) {
-          var c__3073__auto___5796 = cljs.core.chunk_first.call(null, seq__5767_5795__$1);
-          var G__5797 = cljs.core.chunk_rest.call(null, seq__5767_5795__$1);
-          var G__5798 = c__3073__auto___5796;
-          var G__5799 = cljs.core.count.call(null, c__3073__auto___5796);
-          var G__5800 = 0;
-          seq__5767_5779 = G__5797;
-          chunk__5768_5780 = G__5798;
-          count__5769_5781 = G__5799;
-          i__5770_5782 = G__5800;
-          continue
-        }else {
-          var vec__5773_5801 = cljs.core.first.call(null, seq__5767_5795__$1);
-          var typ_5802 = cljs.core.nth.call(null, vec__5773_5801, 0, null);
-          var path_5803 = cljs.core.nth.call(null, vec__5773_5801, 1, null);
-          var a_5804__$1 = cljs.core.nth.call(null, vec__5773_5801, 2, null);
-          var b_5805 = cljs.core.nth.call(null, vec__5773_5801, 3, null);
-          var node_5806 = webfui.core.select_path_dom.call(null, webfui.core.body.call(null), path_5803);
-          var G__5774_5807 = typ_5802;
-          if(cljs.core._EQ_.call(null, "\ufdd0:html", G__5774_5807)) {
-            node_5806.innerHTML = cljs.core.apply.call(null, cljs.core.str, cljs.core.map.call(null, webfui.html.html, a_5804__$1))
-          }else {
-            if(cljs.core._EQ_.call(null, "\ufdd0:rem-att", G__5774_5807)) {
-              node_5806.removeAttribute(cljs.core.name.call(null, a_5804__$1))
-            }else {
-              if(cljs.core._EQ_.call(null, "\ufdd0:att", G__5774_5807)) {
-                if(cljs.core._EQ_.call(null, a_5804__$1, "\ufdd0:value")) {
-                  node_5806.value = [cljs.core.str(b_5805)].join("")
+goog.require("clojure.set");
+goog.require("clojure.set");
+webfui.state_patches.patch = function patch(state, diff) {
+  if(cljs.core.truth_(diff)) {
+    if(cljs.core.map_QMARK_.call(null, state)) {
+      return cljs.core.into.call(null, cljs.core.ObjMap.EMPTY, function() {
+        var iter__3042__auto__ = function iter__5890(s__5891) {
+          return new cljs.core.LazySeq(null, false, function() {
+            var s__5891__$1 = s__5891;
+            while(true) {
+              var temp__4092__auto__ = cljs.core.seq.call(null, s__5891__$1);
+              if(temp__4092__auto__) {
+                var s__5891__$2 = temp__4092__auto__;
+                if(cljs.core.chunked_seq_QMARK_.call(null, s__5891__$2)) {
+                  var c__3040__auto__ = cljs.core.chunk_first.call(null, s__5891__$2);
+                  var size__3041__auto__ = cljs.core.count.call(null, c__3040__auto__);
+                  var b__5893 = cljs.core.chunk_buffer.call(null, size__3041__auto__);
+                  if(function() {
+                    var i__5892 = 0;
+                    while(true) {
+                      if(i__5892 < size__3041__auto__) {
+                        var key = cljs.core._nth.call(null, c__3040__auto__, i__5892);
+                        cljs.core.chunk_append.call(null, b__5893, cljs.core.PersistentVector.fromArray([key, function() {
+                          var val1 = state.call(null, key);
+                          var val2 = diff.call(null, key);
+                          if(cljs.core.truth_(function() {
+                            var and__3941__auto__ = val1;
+                            if(cljs.core.truth_(and__3941__auto__)) {
+                              return val2
+                            }else {
+                              return and__3941__auto__
+                            }
+                          }())) {
+                            return patch.call(null, val1, val2)
+                          }else {
+                            if(cljs.core.contains_QMARK_.call(null, diff, key)) {
+                              return val2
+                            }else {
+                              if("\ufdd0:else") {
+                                return val1
+                              }else {
+                                return null
+                              }
+                            }
+                          }
+                        }()], true));
+                        var G__5894 = i__5892 + 1;
+                        i__5892 = G__5894;
+                        continue
+                      }else {
+                        return true
+                      }
+                      break
+                    }
+                  }()) {
+                    return cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, b__5893), iter__5890.call(null, cljs.core.chunk_rest.call(null, s__5891__$2)))
+                  }else {
+                    return cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, b__5893), null)
+                  }
                 }else {
-                  node_5806.setAttribute(cljs.core.name.call(null, a_5804__$1), webfui.html.render_attribute_value.call(null, a_5804__$1, b_5805))
+                  var key = cljs.core.first.call(null, s__5891__$2);
+                  return cljs.core.cons.call(null, cljs.core.PersistentVector.fromArray([key, function() {
+                    var val1 = state.call(null, key);
+                    var val2 = diff.call(null, key);
+                    if(cljs.core.truth_(function() {
+                      var and__3941__auto__ = val1;
+                      if(cljs.core.truth_(and__3941__auto__)) {
+                        return val2
+                      }else {
+                        return and__3941__auto__
+                      }
+                    }())) {
+                      return patch.call(null, val1, val2)
+                    }else {
+                      if(cljs.core.contains_QMARK_.call(null, diff, key)) {
+                        return val2
+                      }else {
+                        if("\ufdd0:else") {
+                          return val1
+                        }else {
+                          return null
+                        }
+                      }
+                    }
+                  }()], true), iter__5890.call(null, cljs.core.rest.call(null, s__5891__$2)))
                 }
               }else {
-                if("\ufdd0:else") {
-                  throw new Error([cljs.core.str("No matching clause: "), cljs.core.str(typ_5802)].join(""));
-                }else {
-                }
+                return null
               }
+              break
             }
-          }
-          var G__5808 = cljs.core.next.call(null, seq__5767_5795__$1);
-          var G__5809 = null;
-          var G__5810 = 0;
-          var G__5811 = 0;
-          seq__5767_5779 = G__5808;
-          chunk__5768_5780 = G__5809;
-          count__5769_5781 = G__5810;
-          i__5770_5782 = G__5811;
-          continue
-        }
-      }else {
-      }
-    }
-    break
-  }
-  var seq__5775 = cljs.core.seq.call(null, cljs.core.deref.call(null, webfui.plugin.core.active_plugins));
-  var chunk__5776 = null;
-  var count__5777 = 0;
-  var i__5778 = 0;
-  while(true) {
-    if(i__5778 < count__5777) {
-      var plugin = cljs.core._nth.call(null, chunk__5776, i__5778);
-      webfui.plugin.core.fix_dom.call(null, plugin);
-      var G__5812 = seq__5775;
-      var G__5813 = chunk__5776;
-      var G__5814 = count__5777;
-      var G__5815 = i__5778 + 1;
-      seq__5775 = G__5812;
-      chunk__5776 = G__5813;
-      count__5777 = G__5814;
-      i__5778 = G__5815;
-      continue
+          }, null)
+        };
+        return iter__3042__auto__.call(null, clojure.set.union.call(null, cljs.core.set.call(null, cljs.core.keys.call(null, state)), cljs.core.set.call(null, cljs.core.keys.call(null, diff))))
+      }())
     }else {
-      var temp__4092__auto__ = cljs.core.seq.call(null, seq__5775);
-      if(temp__4092__auto__) {
-        var seq__5775__$1 = temp__4092__auto__;
-        if(cljs.core.chunked_seq_QMARK_.call(null, seq__5775__$1)) {
-          var c__3073__auto__ = cljs.core.chunk_first.call(null, seq__5775__$1);
-          var G__5816 = cljs.core.chunk_rest.call(null, seq__5775__$1);
-          var G__5817 = c__3073__auto__;
-          var G__5818 = cljs.core.count.call(null, c__3073__auto__);
-          var G__5819 = 0;
-          seq__5775 = G__5816;
-          chunk__5776 = G__5817;
-          count__5777 = G__5818;
-          i__5778 = G__5819;
-          continue
+      if(cljs.core.vector_QMARK_.call(null, state)) {
+        if(cljs.core.map_QMARK_.call(null, diff)) {
+          return cljs.core.vec.call(null, cljs.core.map_indexed.call(null, function(index, item) {
+            var temp__4090__auto__ = diff.call(null, index);
+            if(cljs.core.truth_(temp__4090__auto__)) {
+              var d = temp__4090__auto__;
+              return patch.call(null, item, d)
+            }else {
+              return item
+            }
+          }, state))
         }else {
-          var plugin = cljs.core.first.call(null, seq__5775__$1);
-          webfui.plugin.core.fix_dom.call(null, plugin);
-          var G__5820 = cljs.core.next.call(null, seq__5775__$1);
-          var G__5821 = null;
-          var G__5822 = 0;
-          var G__5823 = 0;
-          seq__5775 = G__5820;
-          chunk__5776 = G__5821;
-          count__5777 = G__5822;
-          i__5778 = G__5823;
-          continue
+          return diff
         }
       }else {
-        return null
-      }
-    }
-    break
-  }
-};
-webfui.core.parsed_html_atom = cljs.core.atom.call(null, new webfui.html.parsed_html("\ufdd0:body", cljs.core.ObjMap.EMPTY, null));
-webfui.core.update_parsed_html_atom = function update_parsed_html_atom(new$, old) {
-  return new webfui.html.parsed_html("\ufdd0:body", cljs.core.ObjMap.EMPTY, function() {
-    var or__3943__auto__ = cljs.core.seq_QMARK_.call(null, new$);
-    if(or__3943__auto__) {
-      return or__3943__auto__
-    }else {
-      return cljs.core.list_QMARK_.call(null, new$)
-    }
-  }() ? webfui.html.parse_html.call(null, new$) : webfui.html.parse_html.call(null, cljs.core.list.call(null, new$)))
-};
-webfui.core.html_watcher = function html_watcher(key, a, old, new$) {
-  return cljs.core.swap_BANG_.call(null, webfui.core.parsed_html_atom, cljs.core.partial.call(null, webfui.core.update_parsed_html_atom, new$))
-};
-webfui.core.dom_watchers = cljs.core.atom.call(null, cljs.core.ObjMap.EMPTY);
-webfui.core.core_add_dom_watch = function core_add_dom_watch(id, fun) {
-  return cljs.core.swap_BANG_.call(null, webfui.core.dom_watchers, cljs.core.assoc, id, fun)
-};
-webfui.core.init_dom = function init_dom(html) {
-  var b = webfui.core.body.call(null);
-  var seq__5828_5832 = cljs.core.seq.call(null, cljs.core.deref.call(null, webfui.plugin.core.active_plugins));
-  var chunk__5829_5833 = null;
-  var count__5830_5834 = 0;
-  var i__5831_5835 = 0;
-  while(true) {
-    if(i__5831_5835 < count__5830_5834) {
-      var plugin_5836 = cljs.core._nth.call(null, chunk__5829_5833, i__5831_5835);
-      webfui.plugin.core.declare_events.call(null, plugin_5836, webfui.core.body.call(null), webfui.core.dom_watchers, webfui.core.parsed_html_atom);
-      var G__5837 = seq__5828_5832;
-      var G__5838 = chunk__5829_5833;
-      var G__5839 = count__5830_5834;
-      var G__5840 = i__5831_5835 + 1;
-      seq__5828_5832 = G__5837;
-      chunk__5829_5833 = G__5838;
-      count__5830_5834 = G__5839;
-      i__5831_5835 = G__5840;
-      continue
-    }else {
-      var temp__4092__auto___5841 = cljs.core.seq.call(null, seq__5828_5832);
-      if(temp__4092__auto___5841) {
-        var seq__5828_5842__$1 = temp__4092__auto___5841;
-        if(cljs.core.chunked_seq_QMARK_.call(null, seq__5828_5842__$1)) {
-          var c__3073__auto___5843 = cljs.core.chunk_first.call(null, seq__5828_5842__$1);
-          var G__5844 = cljs.core.chunk_rest.call(null, seq__5828_5842__$1);
-          var G__5845 = c__3073__auto___5843;
-          var G__5846 = cljs.core.count.call(null, c__3073__auto___5843);
-          var G__5847 = 0;
-          seq__5828_5832 = G__5844;
-          chunk__5829_5833 = G__5845;
-          count__5830_5834 = G__5846;
-          i__5831_5835 = G__5847;
-          continue
+        if("\ufdd0:else") {
+          return diff
         }else {
-          var plugin_5848 = cljs.core.first.call(null, seq__5828_5842__$1);
-          webfui.plugin.core.declare_events.call(null, plugin_5848, webfui.core.body.call(null), webfui.core.dom_watchers, webfui.core.parsed_html_atom);
-          var G__5849 = cljs.core.next.call(null, seq__5828_5842__$1);
-          var G__5850 = null;
-          var G__5851 = 0;
-          var G__5852 = 0;
-          seq__5828_5832 = G__5849;
-          chunk__5829_5833 = G__5850;
-          count__5830_5834 = G__5851;
-          i__5831_5835 = G__5852;
-          continue
+          return null
         }
-      }else {
       }
     }
-    break
-  }
-  cljs.core.add_watch.call(null, html, "\ufdd0:dom-watcher", webfui.core.html_watcher);
-  cljs.core.add_watch.call(null, webfui.core.parsed_html_atom, "\ufdd0:parsed-html-watcher", webfui.core.parsed_html_watcher);
-  return cljs.core.swap_BANG_.call(null, html, cljs.core.identity)
-};
-webfui.core.core_defdom = function core_defdom(clj_dom) {
-  if(cljs.core.truth_(webfui.core.dom_ready_QMARK_.call(null))) {
-    return webfui.core.init_dom.call(null, clj_dom)
   }else {
-    return webfui.core.dom_ready.call(null, cljs.core.partial.call(null, webfui.core.init_dom, clj_dom))
+    return state
   }
 };
-goog.provide("webfui.plugin.form_values");
-goog.require("cljs.core");
-goog.require("webfui.plugin.core");
-goog.require("webfui.dom_manipulation");
-goog.require("webfui.dom_manipulation");
-goog.require("webfui.plugin.core");
-webfui.plugin.form_values.input = function input(dom_watchers, parsed_html, event) {
-  var target = event.target;
-  var vec__5660 = webfui.dom_manipulation.resolve_target.call(null, cljs.core.deref.call(null, parsed_html), target);
-  var tagname = cljs.core.nth.call(null, vec__5660, 0, null);
-  var attributes = cljs.core.nth.call(null, vec__5660, 1, null);
-  var element = vec__5660;
-  var event__$1 = cljs.core.deref.call(null, dom_watchers).call(null, cljs.core.keyword.call(null, (new cljs.core.Keyword("\ufdd0:watch")).call(null, attributes)));
-  if(cljs.core.truth_(function() {
-    var and__3941__auto__ = event__$1;
-    if(cljs.core.truth_(and__3941__auto__)) {
-      return cljs.core.contains_QMARK_.call(null, cljs.core.PersistentHashSet.fromArray(["\ufdd0:textarea", null, "\ufdd0:input", null], true), tagname)
-    }else {
-      return and__3941__auto__
-    }
-  }())) {
-    var value = target.value;
-    var new_element = cljs.core.update_in.call(null, element, cljs.core.PersistentVector.fromArray([1, "\ufdd0:value"], true), function(value) {
-      return function(old) {
-        target.value = old;
-        return value
-      }
-    }(value));
-    return event__$1.call(null, element, new_element)
-  }else {
-    return null
-  }
-};
-goog.provide("webfui.plugin.form_values.form_values");
-webfui.plugin.form_values.form_values = function() {
-};
-webfui.plugin.form_values.form_values.cljs$lang$type = true;
-webfui.plugin.form_values.form_values.cljs$lang$ctorStr = "webfui.plugin.form-values/form-values";
-webfui.plugin.form_values.form_values.cljs$lang$ctorPrWriter = function(this__2882__auto__, writer__2883__auto__, opt__2884__auto__) {
-  return cljs.core._write.call(null, writer__2883__auto__, "webfui.plugin.form-values/form-values")
-};
-webfui.plugin.form_values.form_values.prototype.webfui$plugin$core$Plugin$ = true;
-webfui.plugin.form_values.form_values.prototype.webfui$plugin$core$Plugin$declare_events$arity$4 = function(this$, body, dom_watchers, parsed_html) {
-  var self__ = this;
-  return body.addEventListener("input", cljs.core.partial.call(null, webfui.plugin.form_values.input, dom_watchers, parsed_html))
-};
-webfui.plugin.form_values.form_values.prototype.webfui$plugin$core$Plugin$fix_dom$arity$1 = function(this$) {
-  var self__ = this;
-  return null
-};
-goog.provide("webfui.dom");
-goog.require("cljs.core");
-goog.require("webfui.plugin.core");
-goog.require("webfui.core");
-goog.require("webfui.plugin.form_values");
-goog.require("webfui.plugin.form_values");
-goog.require("webfui.plugin.core");
-goog.require("webfui.core");
-webfui.dom.add_dom_watch = webfui.core.core_add_dom_watch;
-webfui.dom.defdom = webfui.core.core_defdom;
-webfui.plugin.core.register_plugin.call(null, new webfui.plugin.form_values.form_values);
 goog.provide("webfui.framework");
 goog.require("cljs.core");
 goog.require("webfui.plugin.core");
@@ -24353,6 +24432,7 @@ goog.require("cljs.core");
 goog.require("webfui.framework");
 goog.require("webfui.utilities");
 goog.require("cljs.reader");
+goog.require("s_exploration.renderers");
 goog.require("cljs.reader");
 goog.require("webfui.utilities");
 goog.require("webfui.framework");
@@ -24360,102 +24440,25 @@ s_exploration.core.c_log = function c_log(x) {
   console.log(cljs.core.clj__GT_js.call(null, x));
   return x
 };
-s_exploration.core.render_sym = function render_sym(sym) {
-  return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-symbol.sexp-item", [cljs.core.str(sym)].join("")], true)
-};
-s_exploration.core.render_defn = function render_defn(p__4800) {
-  var vec__4802 = p__4800;
-  var _ = cljs.core.nth.call(null, vec__4802, 0, null);
-  var name = cljs.core.nth.call(null, vec__4802, 1, null);
-  var args = cljs.core.nth.call(null, vec__4802, 2, null);
-  var body = cljs.core.nthnext.call(null, vec__4802, 3);
-  return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-defn.sexp-wrap", cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-defn.sexp-item", "defn"], true), cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-fn.sexp-item", [cljs.core.str(name)].join("")], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-vec.sexp-wrap", cljs.core.map.call(null, s_exploration.core.render_sexp, args)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.newline", cljs.core.map.call(null, 
-  s_exploration.core.render_sexp, body)], true)], true)
-};
-s_exploration.core.render_if = function render_if(p__4803) {
-  var vec__4805 = p__4803;
-  var _ = cljs.core.nth.call(null, vec__4805, 0, null);
-  var cond = cljs.core.nth.call(null, vec__4805, 1, null);
-  var then = cljs.core.nth.call(null, vec__4805, 2, null);
-  var else$ = cljs.core.nth.call(null, vec__4805, 3, null);
-  return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-if.sexp-wrap", cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-if", "if"], true), s_exploration.core.render_sexp.call(null, cond), cljs.core.PersistentVector.fromArray(["\ufdd0:div.newline", s_exploration.core.render_sexp.call(null, then), cljs.core.PersistentVector.fromArray(["\ufdd0:div.newline", s_exploration.core.render_sexp.call(null, else$)], true)], true)], true)
-};
-s_exploration.core.render_call = function render_call(p__4806) {
-  var vec__4810 = p__4806;
-  var form = cljs.core.nth.call(null, vec__4810, 0, null);
-  var rest = cljs.core.nthnext.call(null, vec__4810, 1);
-  var sexp = vec__4810;
-  if(cljs.core._EQ_.call(null, form, new cljs.core.Symbol(null, "defn", "defn", -1637452094, null))) {
-    return s_exploration.core.render_defn.call(null, sexp)
-  }else {
-    if(cljs.core._EQ_.call(null, form, new cljs.core.Symbol(null, "if", "if", -1640528170, null))) {
-      return s_exploration.core.render_if.call(null, sexp)
-    }else {
-      if("\ufdd0:else") {
-        return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-ap.sexp-wrap", cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-fn.sexp-item", [cljs.core.str(form)].join("")], true), cljs.core.map.call(null, s_exploration.core.render_sexp, rest)], true)
-      }else {
-        return null
-      }
-    }
-  }
-};
-s_exploration.core.render_val = function render_val(sexp) {
-  if(typeof sexp === "number") {
-    return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-num.sexp-item", [cljs.core.str(sexp)].join("")], true)
-  }else {
-    if(cljs.core.string_QMARK_.call(null, sexp)) {
-      return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-str.sexp-item", [cljs.core.str(sexp)].join("")], true)
-    }else {
-      if(cljs.core._EQ_.call(null, sexp, new cljs.core.Symbol(null, "&", "&", -1640531489, null))) {
-        return cljs.core.PersistentVector.fromArray(["\ufdd0:span", "&"], true)
-      }else {
-        if(sexp instanceof cljs.core.Symbol) {
-          return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-symbol.sexp-item", [cljs.core.str(sexp)].join("")], true)
-        }else {
-          if(true) {
-            return cljs.core.PersistentVector.fromArray(["\ufdd0:span.sexp-val.sexp-item", [cljs.core.str(sexp)].join("")], true)
-          }else {
-            return null
-          }
-        }
-      }
-    }
-  }
-};
-s_exploration.core.render_sexp = function render_sexp(sexp) {
-  if(cljs.core.vector_QMARK_.call(null, sexp)) {
-    return cljs.core.PersistentVector.fromArray(["\ufdd0:div.wrap-vec.sexp-wrap", cljs.core.map.call(null, render_sexp, sexp)], true)
-  }else {
-    if(cljs.core.coll_QMARK_.call(null, sexp)) {
-      return s_exploration.core.render_call.call(null, sexp)
-    }else {
-      if(true) {
-        return s_exploration.core.render_val.call(null, sexp)
-      }else {
-        return null
-      }
-    }
-  }
-};
-s_exploration.core.render_all = function render_all(p__4813) {
-  var map__4815 = p__4813;
-  var map__4815__$1 = cljs.core.seq_QMARK_.call(null, map__4815) ? cljs.core.apply.call(null, cljs.core.hash_map, map__4815) : map__4815;
-  var code = cljs.core.get.call(null, map__4815__$1, "\ufdd0:code");
-  var sexps = cljs.core.get.call(null, map__4815__$1, "\ufdd0:sexps");
-  return cljs.core.PersistentVector.fromArray(["\ufdd0:dic#content", cljs.core.PersistentVector.fromArray(["\ufdd0:h1", "S\u5f0f"], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div", cljs.core.PersistentVector.fromArray(["\ufdd0:textarea#code", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:watch", "\ufdd0:code-watch"], true), [cljs.core.str(code)].join("")], true)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.visual-sexp", cljs.core.map.call(null, s_exploration.core.render_sexp, 
+s_exploration.core.render_all = function render_all(p__3631) {
+  var map__3633 = p__3631;
+  var map__3633__$1 = cljs.core.seq_QMARK_.call(null, map__3633) ? cljs.core.apply.call(null, cljs.core.hash_map, map__3633) : map__3633;
+  var code = cljs.core.get.call(null, map__3633__$1, "\ufdd0:code");
+  var sexps = cljs.core.get.call(null, map__3633__$1, "\ufdd0:sexps");
+  return cljs.core.PersistentVector.fromArray(["\ufdd0:dic#content", cljs.core.PersistentVector.fromArray(["\ufdd0:h1", "S\u5f0f"], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div", cljs.core.PersistentVector.fromArray(["\ufdd0:textarea#code", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:watch", "\ufdd0:code-watch"], true), [cljs.core.str(code)].join("")], true)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.visual-sexp", cljs.core.map.call(null, s_exploration.renderers.render_sexp, 
   sexps)], true)], true)
 };
 webfui.framework.add_dom_watch_helper.call(null, "\ufdd0:code-watch", function(state, new_el) {
   var code = (new cljs.core.Keyword("\ufdd0:value")).call(null, cljs.core.second.call(null, new_el));
   try {
     return cljs.core.PersistentArrayMap.fromArray(["\ufdd0:sexps", cljs.reader.read_string.call(null, [cljs.core.str("["), cljs.core.str(code), cljs.core.str("]")].join("")), "\ufdd0:code", code], true)
-  }catch(e4816) {
-    if(e4816 instanceof Object) {
-      var e = e4816;
+  }catch(e3634) {
+    if(e3634 instanceof Object) {
+      var e = e3634;
       return cljs.core.PersistentArrayMap.fromArray(["\ufdd0:code", code], true)
     }else {
       if("\ufdd0:else") {
-        throw e4816;
+        throw e3634;
       }else {
         return null
       }
