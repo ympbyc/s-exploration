@@ -24476,26 +24476,26 @@ s_exploration.core.c_log = function c_log(x) {
   console.log(cljs.core.clj__GT_js.call(null, x));
   return x
 };
-s_exploration.core.render_all = function render_all(p__24394) {
-  var map__24396 = p__24394;
-  var map__24396__$1 = cljs.core.seq_QMARK_.call(null, map__24396) ? cljs.core.apply.call(null, cljs.core.hash_map, map__24396) : map__24396;
-  var code = cljs.core.get.call(null, map__24396__$1, "\ufdd0:code");
-  var sexps = cljs.core.get.call(null, map__24396__$1, "\ufdd0:sexps");
+s_exploration.core.render_all = function render_all(p__29270) {
+  var map__29272 = p__29270;
+  var map__29272__$1 = cljs.core.seq_QMARK_.call(null, map__29272) ? cljs.core.apply.call(null, cljs.core.hash_map, map__29272) : map__29272;
+  var code = cljs.core.get.call(null, map__29272__$1, "\ufdd0:code");
+  var sexps = cljs.core.get.call(null, map__29272__$1, "\ufdd0:sexps");
   return cljs.core.PersistentVector.fromArray(["\ufdd0:div", cljs.core.PersistentVector.fromArray(["\ufdd0:header", cljs.core.PersistentVector.fromArray(["\ufdd0:h1", "S-Exploration"], true), cljs.core.PersistentVector.fromArray(["\ufdd0:i", "Code is data. Data needs a visualization tool."], true)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div#content", cljs.core.PersistentVector.fromArray(["\ufdd0:span", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:style", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:color", 
-  "red"], true)], true), "Due to WebFUI's undesirable behaviour, the textarea is disabled for now. Please be patient until I patch that away."], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.grid-third", cljs.core.PersistentVector.fromArray(["\ufdd0:textarea#code", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:watch", "\ufdd0:code-watch"], true), [cljs.core.str(code)].join("")], true)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.grid-two-thirds", cljs.core.PersistentVector.fromArray(["\ufdd0:div.visual-sexp", 
+  "red"], true)], true), "Due to WebFUI's undesirable behaviour, the textarea doesn't work as expected for now. Please be patient until I patch that away."], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.grid-third", cljs.core.PersistentVector.fromArray(["\ufdd0:textarea#code", cljs.core.PersistentArrayMap.fromArray(["\ufdd0:watch", "\ufdd0:code-watch"], true), [cljs.core.str(code)].join("")], true)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:div.grid-two-thirds", cljs.core.PersistentVector.fromArray(["\ufdd0:div.visual-sexp", 
   cljs.core.map.call(null, s_exploration.renderers.render_sexp, sexps)], true), cljs.core.PersistentVector.fromArray(["\ufdd0:span", "Mouseover the blocks to see hints."], true)], true)], true)], true)
 };
 webfui.framework.add_dom_watch_helper.call(null, "\ufdd0:code-watch", function(state, new_el) {
   var code = (new cljs.core.Keyword("\ufdd0:value")).call(null, cljs.core.second.call(null, new_el));
   try {
     return cljs.core.PersistentArrayMap.fromArray(["\ufdd0:sexps", cljs.reader.read_string.call(null, [cljs.core.str("["), cljs.core.str(code), cljs.core.str("]")].join("")), "\ufdd0:code", code], true)
-  }catch(e24397) {
-    if(e24397 instanceof Object) {
-      var e = e24397;
+  }catch(e29273) {
+    if(e29273 instanceof Object) {
+      var e = e29273;
       return cljs.core.PersistentArrayMap.fromArray(["\ufdd0:code", code], true)
     }else {
       if("\ufdd0:else") {
-        throw e24397;
+        throw e29273;
       }else {
         return null
       }
