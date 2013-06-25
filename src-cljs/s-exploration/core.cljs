@@ -18,7 +18,8 @@
    [:div#content
     [:span {:style {:color "red"}} "Due to WebFUI's undesirable behaviour, the textarea doesn't work as expected for now. Please be patient until I patch that away."]
     [:div.grid-third
-     [:textarea#code {:watch :code-watch}
+     [:textarea#code {:watch :code-watch
+                      :value (str code)}
       (str code)]]
     [:div.grid-two-thirds
      [:div.visual-sexp
