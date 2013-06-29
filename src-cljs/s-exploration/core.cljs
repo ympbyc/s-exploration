@@ -14,7 +14,7 @@
 (defn render-all [{:keys [sexps code]}]
   [:div
    [:header [:h1 "S-Exploration"]
-    [:i "Code is data. Data needs a visualization tool."]]
+    [:i "Graphical S-expression Editor"]]
    [:div#content
     [:div.grid-third
      [:textarea#code {:watch :code-watch
