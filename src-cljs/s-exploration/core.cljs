@@ -16,7 +16,6 @@
    [:header [:h1 "S-Exploration"]
     [:i "Code is data. Data needs a visualization tool."]]
    [:div#content
-    [:span {:style {:color "red"}} "Due to WebFUI's undesirable behaviour, the textarea doesn't work as expected for now. Please be patient until I patch that away."]
     [:div.grid-third
      [:textarea#code {:watch :code-watch
                       :value (str code)}
