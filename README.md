@@ -1,6 +1,5 @@
 # S-exploration
 
-S-expression visualizer
 
 ![Screenshot](https://raw.github.com/ympbyc/s-exploration/master/resources/public/images/s-exploration20130624.png)
 
